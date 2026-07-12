@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hunter System</title>
-<meta name="description" content="Level up your real life — quests, XP, stats and streaks.">
+<meta name="description" content="Level up your real life — quests, XP, bosses, skills.">
 <meta name="theme-color" content="#060B18">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
@@ -14,235 +14,119 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
-
-  :root {
-    --bg: #060B18;
-    --panel-border: rgba(62,230,255,0.35);
-    --cyan: #3EE6FF;
-    --text: #C9E8FF;
-    --text-bright: #DCEBFF;
-    --text-dim: #7E97BC;
-    --text-faint: #40587C;
-    --green: #7CFFB2;
-    --gold: #FFD76A;
-    --pink: #FF4D8D;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    min-height: 100vh;
-    background: radial-gradient(1200px 600px at 50% -10%, #0B1B3A 0%, #060B18 55%);
-    color: var(--text);
-    font-family: 'Rajdhani', system-ui, sans-serif;
-    padding: 20px 14px 60px;
-  }
-
-  .mono { font-family: 'Share Tech Mono', monospace; }
-
-  .wrap { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-
-  .panel {
-    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
-    background: linear-gradient(160deg, rgba(10,22,44,0.92), rgba(6,12,26,0.95));
-    border: 1px solid var(--panel-border);
-    box-shadow: 0 0 18px rgba(62,230,255,0.12), inset 0 0 30px rgba(62,230,255,0.04);
-    padding: 16px 20px;
-  }
-
-  .sys-title { font-size: 11px; letter-spacing: 0.45em; color: var(--cyan); text-align: center; }
-  .section-title { font-size: 11px; letter-spacing: 0.4em; color: var(--cyan); margin-bottom: 12px; }
-
-  @keyframes sysPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
-  @keyframes rise { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .pulse { animation: sysPulse 2.4s ease-in-out infinite; }
-  .rise { animation: rise .35s ease-out; }
-  @media (prefers-reduced-motion: reduce) { .pulse, .rise { animation: none; } }
-
-  .header-row { display: flex; align-items: center; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
-
-  .rank-badge {
-    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    width: 74px; height: 74px; flex-shrink: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  .rank-letter { font-size: 30px; font-weight: 700; line-height: 1; }
-  .rank-label { font-size: 9px; letter-spacing: 0.25em; color: var(--text-dim); }
-
-  .hunter-info { flex: 1; min-width: 220px; }
-  .hunter-name-row { display: flex; justify-content: space-between; align-items: baseline; }
-  .hunter-name { font-size: 22px; font-weight: 700; letter-spacing: 0.08em; }
-  .lvl { font-size: 13px; color: var(--cyan); }
-
-  .xp-track {
-    margin-top: 8px; height: 12px;
-    background: rgba(62,230,255,0.1);
-    border: 1px solid rgba(62,230,255,0.3);
-    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-  }
-  .xp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #1FB6E0, #3EE6FF);
-    box-shadow: 0 0 10px rgba(62,230,255,0.53);
-    transition: width .4s ease;
-  }
-  .xp-numbers { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 4px; }
-
-  .meta-row { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: #9FB8D9; flex-wrap: wrap; align-items: center; }
-  .meta-row b.fire { color: #FF8A5C; }
-  .meta-row b.cy { color: var(--cyan); }
-
-  .sync-chip {
-    margin-left: auto; cursor: pointer; background: none;
-    border: 1px solid rgba(62,230,255,0.3); color: #9FB8D9;
-    font-family: 'Share Tech Mono', monospace; font-size: 11px;
-    padding: 3px 10px; letter-spacing: 0.1em;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-  .sync-chip.on { color: var(--green); border-color: rgba(124,255,178,0.4); }
-  .sync-chip.busy { color: var(--gold); border-color: rgba(255,215,106,0.4); }
-  .sync-chip.off { color: var(--pink); border-color: rgba(255,77,141,0.4); }
-
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-  .stat-card {
-    padding: 10px 12px;
-    border: 1px solid rgba(62,230,255,0.18);
-    background: rgba(62,230,255,0.03);
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-  }
-  .stat-top { display: flex; justify-content: space-between; align-items: baseline; }
-  .stat-name { font-weight: 700; letter-spacing: 0.08em; }
-  .stat-lvl { font-size: 11px; color: #9FB8D9; }
-  .stat-desc { font-size: 12px; color: var(--text-dim); margin: 2px 0 6px; }
-  .stat-track {
-    height: 6px; background: rgba(255,255,255,0.06);
-    clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
-  }
-  .stat-fill { height: 100%; transition: width .4s ease; }
-
-  .quests-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .btn-edit {
-    font-family: 'Share Tech Mono', monospace; font-size: 11px;
-    background: none; border: 1px solid rgba(62,230,255,0.3); color: #9FB8D9;
-    padding: 4px 10px; cursor: pointer;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-
-  .quest-list { display: flex; flex-direction: column; gap: 8px; }
-  .quest {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-    border: 1px solid rgba(62,230,255,0.18);
-    background: rgba(62,230,255,0.03);
-  }
-  .quest.done { border-color: rgba(124,255,178,0.4); background: rgba(124,255,178,0.05); }
-  .quest-check {
-    width: 24px; height: 24px; flex-shrink: 0; cursor: pointer;
-    border: 1px solid var(--cyan); background: transparent;
-    color: #06121F; font-weight: 700; font-size: 14px;
-    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-  }
-  .quest.done .quest-check { border-color: var(--green); background: var(--green); }
-  .quest-name { flex: 1; font-weight: 600; font-size: 15px; color: var(--text-bright); }
-  .quest.done .quest-name { text-decoration: line-through; color: var(--text-dim); }
-  .quest-xp { font-size: 12px; flex-shrink: 0; }
-  .btn-del {
-    background: none; border: 1px solid rgba(255,77,141,0.4); color: var(--pink);
-    cursor: pointer; padding: 2px 8px; font-size: 12px;
-    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-  }
-
-  .add-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-  .add-row input[type=text] {
-    flex: 1; min-width: 180px;
-    background: rgba(62,230,255,0.05); border: 1px solid rgba(62,230,255,0.25);
-    color: var(--text-bright); padding: 8px 12px; font-size: 14px; font-family: inherit;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-  .add-row select, .add-row input[type=number] {
-    background: #0A1628; border: 1px solid rgba(62,230,255,0.25);
-    color: var(--text-bright); padding: 8px 10px; font-size: 13px;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-  .add-row input[type=number] { width: 70px; }
-  .btn-add {
-    background: linear-gradient(90deg, #1FB6E0, #3EE6FF); border: none;
-    color: #04121F; font-weight: 700; padding: 8px 16px; cursor: pointer;
-    letter-spacing: 0.06em; font-family: inherit; font-size: 14px;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-
-  .footer-note { text-align: center; font-size: 10px; color: var(--text-faint); letter-spacing: 0.3em; }
-
-  #toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: rgba(6,18,31,0.95); border: 1px solid var(--cyan); color: var(--cyan);
-    padding: 10px 20px; font-size: 13px; letter-spacing: 0.12em;
-    box-shadow: 0 0 20px rgba(62,230,255,0.3); z-index: 200; display: none;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-    max-width: 92vw; text-align: center;
-  }
-
-  .overlay {
-    position: fixed; inset: 0; background: rgba(4,8,18,0.85);
-    display: none; align-items: center; justify-content: center; z-index: 100;
-    padding: 16px;
-  }
-  .levelup-box {
-    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
-    padding: 36px 48px; text-align: center;
-    border: 1px solid var(--gold);
-    background: linear-gradient(160deg, rgba(20,26,10,0.95), rgba(10,12,6,0.98));
-    box-shadow: 0 0 60px rgba(255,215,106,0.35);
-  }
-  .levelup-tag { font-size: 11px; letter-spacing: 0.5em; color: var(--gold); }
-  .levelup-big {
-    font-size: 42px; font-weight: 700; color: var(--gold); margin: 14px 0 6px;
-    text-shadow: 0 0 24px rgba(255,215,106,0.6); letter-spacing: 0.1em;
-  }
-  .levelup-sub { font-size: 16px; color: var(--text-bright); }
-  .levelup-hint { font-size: 11px; color: var(--text-dim); margin-top: 16px; letter-spacing: 0.2em; }
-
-  .key-box {
-    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
-    padding: 26px 24px; max-width: 460px; width: 100%;
-    border: 1px solid var(--panel-border);
-    background: linear-gradient(160deg, rgba(10,22,44,0.97), rgba(6,12,26,0.99));
-    box-shadow: 0 0 40px rgba(62,230,255,0.2);
-  }
-  .key-display {
-    margin: 10px 0; padding: 10px 12px; font-size: 12px; word-break: break-all;
-    background: rgba(62,230,255,0.06); border: 1px dashed rgba(62,230,255,0.35);
-    color: var(--cyan); cursor: pointer; user-select: all;
-  }
-  .key-note { font-size: 12px; color: var(--text-dim); margin: 8px 0; line-height: 1.5; }
-  .key-input {
-    width: 100%; margin-top: 8px;
-    background: rgba(62,230,255,0.05); border: 1px solid rgba(62,230,255,0.25);
-    color: var(--text-bright); padding: 9px 12px; font-size: 13px;
-    font-family: 'Share Tech Mono', monospace;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-  .key-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .btn-cyan {
-    background: linear-gradient(90deg, #1FB6E0, #3EE6FF); border: none;
-    color: #04121F; font-weight: 700; padding: 9px 16px; cursor: pointer;
-    letter-spacing: 0.06em; font-family: inherit; font-size: 13px; flex: 1;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-  .btn-ghost {
-    background: none; border: 1px solid rgba(62,230,255,0.35); color: var(--text);
-    padding: 9px 16px; cursor: pointer; font-family: inherit; font-size: 13px; flex: 1;
-    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  }
-
-  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  :root{--cyan:#3EE6FF;--text:#C9E8FF;--bright:#DCEBFF;--dim:#7E97BC;--faint:#40587C;--green:#7CFFB2;--gold:#FFD76A;--pink:#FF4D8D;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{min-height:100vh;background:radial-gradient(1200px 600px at 50% -10%,#0B1B3A 0%,#060B18 55%);color:var(--text);font-family:'Rajdhani',system-ui,sans-serif;padding:20px 14px 60px;}
+  .mono{font-family:'Share Tech Mono',monospace;}
+  .wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+  .panel{clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);background:linear-gradient(160deg,rgba(10,22,44,.92),rgba(6,12,26,.95));border:1px solid rgba(62,230,255,.35);box-shadow:0 0 18px rgba(62,230,255,.12),inset 0 0 30px rgba(62,230,255,.04);padding:16px 20px;}
+  .sys-title{font-size:11px;letter-spacing:.45em;color:var(--cyan);text-align:center;}
+  .section-title{font-size:11px;letter-spacing:.4em;color:var(--cyan);margin-bottom:12px;}
+  @keyframes sysPulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .pulse{animation:sysPulse 2.4s ease-in-out infinite;}
+  .rise{animation:rise .35s ease-out;}
+  @media (prefers-reduced-motion:reduce){.pulse,.rise{animation:none;}}
+  .header-row{display:flex;align-items:center;gap:18px;margin-top:14px;flex-wrap:wrap;}
+  .rank-badge{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);width:74px;height:74px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .rank-letter{font-size:30px;font-weight:700;line-height:1;}
+  .rank-label{font-size:9px;letter-spacing:.25em;color:var(--dim);}
+  .hunter-info{flex:1;min-width:220px;}
+  .hunter-name-row{display:flex;justify-content:space-between;align-items:baseline;}
+  .hunter-name{font-size:22px;font-weight:700;letter-spacing:.08em;}
+  .lvl{font-size:13px;color:var(--cyan);}
+  .xp-track{margin-top:8px;height:12px;background:rgba(62,230,255,.1);border:1px solid rgba(62,230,255,.3);clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .xp-fill{height:100%;background:linear-gradient(90deg,#1FB6E0,#3EE6FF);box-shadow:0 0 10px rgba(62,230,255,.53);transition:width .4s ease;}
+  .xp-numbers{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px;}
+  .meta-row{display:flex;gap:16px;margin-top:12px;font-size:12px;color:#9FB8D9;flex-wrap:wrap;align-items:center;}
+  .meta-row b.fire{color:#FF8A5C}.meta-row b.cy{color:var(--cyan)}
+  .rank-hint{font-size:11px;color:var(--gold);margin-top:6px;letter-spacing:.05em;}
+  .sync-chip{margin-left:auto;cursor:pointer;background:none;border:1px solid rgba(62,230,255,.3);color:#9FB8D9;font-family:'Share Tech Mono',monospace;font-size:11px;padding:3px 10px;letter-spacing:.1em;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .sync-chip.on{color:var(--green);border-color:rgba(124,255,178,.4)}
+  .sync-chip.busy{color:var(--gold);border-color:rgba(255,215,106,.4)}
+  .sync-chip.off{color:var(--pink);border-color:rgba(255,77,141,.4)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;}
+  .tab-btn{flex:1;min-width:90px;cursor:pointer;background:rgba(62,230,255,.04);border:1px solid rgba(62,230,255,.25);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.15em;padding:10px 6px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .tab-btn.active{color:#04121F;background:linear-gradient(90deg,#1FB6E0,#3EE6FF);border-color:transparent;font-weight:700;}
+  .tabpane{display:none;flex-direction:column;gap:16px;}
+  .tabpane.active{display:flex;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+  .stat-card{padding:10px 12px;border:1px solid rgba(62,230,255,.18);background:rgba(62,230,255,.03);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .stat-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .stat-name{font-weight:700;letter-spacing:.08em;}
+  .stat-lvl{font-size:11px;color:#9FB8D9;}
+  .stat-desc{font-size:12px;color:var(--dim);margin:2px 0 6px;}
+  .stat-track{height:6px;background:rgba(255,255,255,.06);clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px);}
+  .stat-fill{height:100%;transition:width .4s ease;}
+  .quests-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .btn-edit{font-family:'Share Tech Mono',monospace;font-size:11px;background:none;border:1px solid rgba(62,230,255,.3);color:#9FB8D9;padding:4px 10px;cursor:pointer;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .quest-list{display:flex;flex-direction:column;gap:8px;}
+  .quest{display:flex;align-items:center;gap:12px;padding:10px 12px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);border:1px solid rgba(62,230,255,.18);background:rgba(62,230,255,.03);}
+  .quest.done{border-color:rgba(124,255,178,.4);background:rgba(124,255,178,.05);}
+  .quest-check{width:24px;height:24px;flex-shrink:0;cursor:pointer;border:1px solid var(--cyan);background:transparent;color:#06121F;font-weight:700;font-size:14px;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .quest.done .quest-check{border-color:var(--green);background:var(--green);}
+  .quest-name{flex:1;font-weight:600;font-size:15px;color:var(--bright);}
+  .quest.done .quest-name{text-decoration:line-through;color:var(--dim);}
+  .quest-xp{font-size:12px;flex-shrink:0;}
+  .btn-del{background:none;border:1px solid rgba(255,77,141,.4);color:var(--pink);cursor:pointer;padding:2px 8px;font-size:12px;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .add-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .add-row input[type=text]{flex:1;min-width:180px;background:rgba(62,230,255,.05);border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:8px 12px;font-size:14px;font-family:inherit;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .add-row select,.add-row input[type=number]{background:#0A1628;border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:8px 10px;font-size:13px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .add-row input[type=number]{width:70px;}
+  .btn-add{background:linear-gradient(90deg,#1FB6E0,#3EE6FF);border:none;color:#04121F;font-weight:700;padding:8px 16px;cursor:pointer;letter-spacing:.06em;font-family:inherit;font-size:14px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .act-title{font-size:12px;letter-spacing:.3em;color:var(--gold);margin:10px 0 4px;}
+  .boss{display:flex;gap:12px;padding:12px;align-items:center;border:1px solid rgba(255,215,106,.25);background:rgba(255,215,106,.03);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);}
+  .boss.defeated{border-color:rgba(124,255,178,.4);background:rgba(124,255,178,.04);}
+  .boss-art{width:96px;height:60px;flex-shrink:0;object-fit:cover;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .boss-ph{width:96px;height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:#FFDA8F;background:linear-gradient(160deg,#23405A,#8A5560,#E8894A);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .boss-info{flex:1;min-width:0;}
+  .boss-name{font-weight:700;font-size:16px;color:#FFDA8F;letter-spacing:.04em;}
+  .boss.defeated .boss-name{color:var(--green);}
+  .boss-cond{font-size:12px;color:var(--dim);margin-top:2px;}
+  .boss-meta{font-size:11px;color:#9FB8D9;margin-top:3px;}
+  .btn-fight{background:linear-gradient(90deg,#E8894A,#FFD76A);border:none;color:#2A1600;font-weight:700;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px;letter-spacing:.05em;flex-shrink:0;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .btn-undo{background:none;border:1px solid rgba(126,151,188,.4);color:var(--dim);padding:6px 10px;cursor:pointer;font-size:11px;font-family:'Share Tech Mono',monospace;flex-shrink:0;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+  .skill{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;border:1px solid rgba(62,230,255,.25);background:rgba(62,230,255,.03);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);text-align:center;}
+  .skill.locked{opacity:.35;filter:grayscale(1);}
+  .skill-icon{width:56px;height:56px;object-fit:cover;}
+  .skill-glyph{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--cyan);border:1.5px solid var(--cyan);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .skill-name{font-size:13px;font-weight:600;color:var(--bright);}
+  .skill-src{font-size:10px;color:var(--faint);letter-spacing:.05em;}
+  .vault-row{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid rgba(255,215,106,.2);background:rgba(255,215,106,.03);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);flex-wrap:wrap;}
+  .vault-boss{font-size:12px;color:var(--dim);width:150px;flex-shrink:0;}
+  .vault-row input{flex:1;min-width:140px;background:rgba(255,215,106,.05);border:1px solid rgba(255,215,106,.25);color:var(--bright);padding:7px 10px;font-size:13px;font-family:inherit;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .btn-claim{background:none;border:1px solid rgba(255,215,106,.5);color:var(--gold);padding:6px 12px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
+  .btn-claim:disabled{opacity:.3;cursor:default;}
+  .btn-claim.claimed{background:var(--gold);color:#2A1600;font-weight:700;}
+  .footer-note{text-align:center;font-size:10px;color:var(--faint);letter-spacing:.3em;}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(6,18,31,.95);border:1px solid var(--cyan);color:var(--cyan);padding:10px 20px;font-size:13px;letter-spacing:.12em;box-shadow:0 0 20px rgba(62,230,255,.3);z-index:200;display:none;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);max-width:92vw;text-align:center;}
+  .overlay{position:fixed;inset:0;background:rgba(4,8,18,.88);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+  .levelup-box{clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:36px 48px;text-align:center;border:1px solid var(--gold);background:linear-gradient(160deg,rgba(20,26,10,.95),rgba(10,12,6,.98));box-shadow:0 0 60px rgba(255,215,106,.35);}
+  .levelup-tag{font-size:11px;letter-spacing:.5em;color:var(--gold);}
+  .levelup-big{font-size:42px;font-weight:700;color:var(--gold);margin:14px 0 6px;text-shadow:0 0 24px rgba(255,215,106,.6);letter-spacing:.1em;}
+  .levelup-sub{font-size:16px;color:var(--bright);}
+  .levelup-hint{font-size:11px;color:var(--dim);margin-top:16px;letter-spacing:.2em;}
+  .vic-box{clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);max-width:440px;width:100%;text-align:center;border:1px solid #FFDA8F;background:linear-gradient(165deg,#23405A 0%,#8A5560 55%,#E8894A 100%);box-shadow:0 0 60px rgba(232,137,74,.4);padding:0 0 26px;overflow:hidden;}
+  .vic-img{width:100%;height:180px;object-fit:cover;display:block;}
+  .vic-tag{font-size:11px;letter-spacing:.5em;color:#FFE9B8;margin-top:20px;}
+  .vic-big{font-size:34px;font-weight:700;color:#FFF3D0;margin:10px 0 4px;letter-spacing:.08em;text-shadow:0 2px 12px rgba(0,0,0,.45);}
+  .vic-sub{font-size:15px;color:#FFE9B8;}
+  .vic-skill{display:inline-block;margin-top:12px;padding:6px 16px;border:1px solid #FFF3D0;color:#FFF3D0;font-size:13px;letter-spacing:.1em;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .vic-hint{font-size:11px;color:#FFE9B8;opacity:.8;margin-top:16px;letter-spacing:.2em;}
+  .key-box{clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:26px 24px;max-width:460px;width:100%;border:1px solid rgba(62,230,255,.35);background:linear-gradient(160deg,rgba(10,22,44,.97),rgba(6,12,26,.99));box-shadow:0 0 40px rgba(62,230,255,.2);}
+  .key-display{margin:10px 0;padding:10px 12px;font-size:12px;word-break:break-all;background:rgba(62,230,255,.06);border:1px dashed rgba(62,230,255,.35);color:var(--cyan);cursor:pointer;user-select:all;}
+  .key-note{font-size:12px;color:var(--dim);margin:8px 0;line-height:1.5;}
+  .key-input{width:100%;margin-top:8px;background:rgba(62,230,255,.05);border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:9px 12px;font-size:13px;font-family:'Share Tech Mono',monospace;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .key-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .btn-cyan{background:linear-gradient(90deg,#1FB6E0,#3EE6FF);border:none;color:#04121F;font-weight:700;padding:9px 16px;cursor:pointer;letter-spacing:.06em;font-family:inherit;font-size:13px;flex:1;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .btn-ghost{background:none;border:1px solid rgba(62,230,255,.35);color:var(--text);padding:9px 16px;cursor:pointer;font-family:inherit;font-size:13px;flex:1;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- Status window -->
   <div class="panel rise">
     <div class="sys-title mono pulse">&#9672; SYSTEM &middot; STATUS WINDOW &#9672;</div>
     <div class="header-row">
@@ -256,37 +140,64 @@
           <div class="lvl mono" id="lvlText">LV. 1</div>
         </div>
         <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-        <div class="xp-numbers mono">
-          <span id="xpInto">XP 0 / 100</span>
-          <span id="xpTotal">TOTAL 0 XP</span>
-        </div>
+        <div class="xp-numbers mono"><span id="xpInto">XP 0 / 100</span><span id="xpTotal">TOTAL 0 XP</span></div>
       </div>
     </div>
     <div class="meta-row mono">
       <span>&#128293; STREAK: <b class="fire" id="streakText">0 days</b></span>
       <span>&#128203; TODAY: <b class="cy" id="todayText">0/0</b></span>
+      <span>&#9876; BOSSES: <b class="cy" id="bossCount">0/10</b></span>
       <button class="sync-chip" id="syncChip" title="Cloud sync settings">&#9729; LOCAL ONLY</button>
     </div>
+    <div class="rank-hint mono" id="rankHint" style="display:none;"></div>
   </div>
 
-  <!-- Attributes -->
-  <div class="panel rise">
-    <div class="section-title mono">&#9656; ATTRIBUTES</div>
-    <div class="stats-grid" id="statsGrid"></div>
+  <div class="tabs rise">
+    <button class="tab-btn active" data-tab="quests">QUESTS</button>
+    <button class="tab-btn" data-tab="bosses">BOSSES</button>
+    <button class="tab-btn" data-tab="skills">SKILLS</button>
+    <button class="tab-btn" data-tab="vault">VAULT</button>
   </div>
 
-  <!-- Daily quests -->
-  <div class="panel rise">
-    <div class="quests-head">
-      <div class="section-title mono" style="margin-bottom:0;">&#9656; DAILY QUESTS</div>
-      <button class="btn-edit" id="btnEdit">EDIT</button>
+  <div class="tabpane active" id="tab-quests">
+    <div class="panel">
+      <div class="section-title mono">&#9656; ATTRIBUTES</div>
+      <div class="stats-grid" id="statsGrid"></div>
     </div>
-    <div class="quest-list" id="questList"></div>
-    <div class="add-row">
-      <input type="text" id="qName" placeholder="Register new quest&hellip;" maxlength="80">
-      <select id="qStat"></select>
-      <input type="number" id="qXP" min="5" max="100" value="20">
-      <button class="btn-add" id="btnAdd">ADD</button>
+    <div class="panel">
+      <div class="quests-head">
+        <div class="section-title mono" style="margin-bottom:0;">&#9656; DAILY QUESTS</div>
+        <button class="btn-edit" id="btnEdit">EDIT</button>
+      </div>
+      <div class="quest-list" id="questList"></div>
+      <div class="add-row">
+        <input type="text" id="qName" placeholder="Register new quest&hellip;" maxlength="80">
+        <select id="qStat"></select>
+        <input type="number" id="qXP" min="5" max="100" value="20">
+        <button class="btn-add" id="btnAdd">ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-bosses">
+    <div class="panel">
+      <div class="section-title mono">&#9656; BOSS CAMPAIGN</div>
+      <div id="bossList"></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-skills">
+    <div class="panel">
+      <div class="section-title mono">&#9656; SKILLS ACQUIRED</div>
+      <div class="skills-grid" id="skillsGrid"></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-vault">
+    <div class="panel">
+      <div class="section-title mono">&#9656; REWARD VAULT</div>
+      <div class="key-note">Declare each boss reward BEFORE the fight. Claim it only after the boss falls.</div>
+      <div id="vaultList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
     </div>
   </div>
 
@@ -295,7 +206,6 @@
 
 <div id="toast" class="mono"></div>
 
-<!-- Level up -->
 <div id="levelup" class="overlay">
   <div class="levelup-box rise">
     <div class="levelup-tag mono pulse">&#9672; SYSTEM NOTIFICATION &#9672;</div>
@@ -305,15 +215,21 @@
   </div>
 </div>
 
-<!-- Hunter Key / sync settings -->
+<div id="victory" class="overlay">
+  <div class="vic-box rise">
+    <img class="vic-img" id="vicImg" alt="" style="display:none;">
+    <div class="vic-tag mono">&#9672; BOSS DEFEATED &#9672;</div>
+    <div class="vic-big" id="vicName">Boss name</div>
+    <div class="vic-sub mono" id="vicXP">+300 XP</div>
+    <div class="vic-skill mono" id="vicSkill">Skill unlocked</div>
+    <div class="vic-hint mono">TAP TO CONTINUE</div>
+  </div>
+</div>
+
 <div id="keyModal" class="overlay">
   <div class="key-box rise">
     <div class="sys-title mono pulse">&#9672; CLOUD SYNC &middot; HUNTER KEY &#9672;</div>
-    <div class="key-note">
-      Your Hunter Key links your save file across devices. Generate it once, then
-      enter the same key on your other device. <b style="color:var(--gold)">Keep it secret</b> —
-      anyone with this key can access this save.
-    </div>
+    <div class="key-note">Your Hunter Key links your save file across devices. Generate it once, then enter the same key on your other device. <b style="color:var(--gold)">Keep it secret</b> — anyone with this key can access this save.</div>
     <div id="keySection" style="display:none;">
       <div class="key-note" style="margin-bottom:2px;">YOUR KEY (tap to select, then copy):</div>
       <div class="key-display mono" id="keyDisplay"></div>
@@ -331,200 +247,182 @@
 <script>
 // ============================================================
 //  CLOUD SYNC CONFIG — PASTE YOUR TWO SUPABASE VALUES BELOW
-//  (Supabase -> Project Settings -> API)
 // ============================================================
 const SUPABASE_URL = "https://tdfppuhzqngqjhruticf.supabase.co";      // looks like: https://abcdefgh.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnBwdWh6cW5ncWpocnV0aWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTE1MzcsImV4cCI6MjA5OTQyNzUzN30.FlTB7sM978K0koAIsxprnwhSm7X0cuB9CCSAe-6f450";    // the long "anon public" key
 // ============================================================
 
-// ---------- Config ----------
 const STATS = {
-  INT: { name: "Intelligence", desc: "Data Science / IBM cert", color: "#3EE6FF" },
-  LNG: { name: "Language",     desc: "Portuguese practice",     color: "#7CFFB2" },
-  CRE: { name: "Creation",     desc: "YouTube / content",       color: "#C77DFF" },
-  VIT: { name: "Vitality",     desc: "Health & exercise",       color: "#FF8A5C" },
-  CAR: { name: "Career",       desc: "Farm work / portfolio",   color: "#FFD76A" }
+  VIT: { name: "Vitality",     desc: "Body & health",            color: "#FF8A5C" },
+  INT: { name: "Intelligence", desc: "Courses, books, AI",       color: "#3EE6FF" },
+  CRE: { name: "Creation",     desc: "YouTube channel",          color: "#C77DFF" },
+  TER: { name: "Territory",    desc: "Building the land",        color: "#7CFFB2" },
+  BRZ: { name: "The Crossing", desc: "Portuguese & relocation",  color: "#FFD76A" },
+  SEA: { name: "Maritime",     desc: "Fishing business",         color: "#5CA9FF" }
 };
 
 const DEFAULT_QUESTS = [
-  { id: 1, name: "Complete 1 IBM course module",   stat: "INT", xp: 30, doneDate: null },
-  { id: 2, name: "30 min Portuguese practice",     stat: "LNG", xp: 20, doneDate: null },
-  { id: 3, name: "Work on a YouTube episode",      stat: "CRE", xp: 25, doneDate: null },
-  { id: 4, name: "Exercise / walk 30 min",         stat: "VIT", xp: 15, doneDate: null },
-  { id: 5, name: "Portfolio or farm project work", stat: "CAR", xp: 25, doneDate: null }
+  { id: 1, name: "Gym session",                          stat: "VIT", xp: 20, doneDate: null },
+  { id: 2, name: "Complete 1 course module",             stat: "INT", xp: 30, doneDate: null },
+  { id: 3, name: "Script / record / edit session",       stat: "CRE", xp: 25, doneDate: null },
+  { id: 4, name: "Land task: quote, materials, or site", stat: "TER", xp: 25, doneDate: null },
+  { id: 5, name: "30 min Portuguese practice",           stat: "BRZ", xp: 20, doneDate: null },
+  { id: 6, name: "Research boats, licenses, or market",  stat: "SEA", xp: 20, doneDate: null }
+];
+
+const ACTS = { 1: "ACT I — THE PREPARATION", 2: "ACT II — THE CROSSING", 3: "ACT III — THE NEW WORLD" };
+
+const BOSSES = [
+  { id: "capstone",   act: 1, name: "IBM Capstone",           cond: "Capstone submitted, certificate earned",     xp: 300,  stat: "INT", skill: "Certified Data Professional", img: "boss-capstone.jpg",   icon: "skill-certified.png" },
+  { id: "episode",    act: 1, name: "First Episode Live",     cond: "First YouTube episode published",            xp: 300,  stat: "CRE", skill: "Storyteller",                 img: "boss-episode.jpg",    icon: "skill-storyteller.png" },
+  { id: "liquidation",act: 1, name: "The Great Liquidation",  cond: "UAE affairs closed, belongings sold",        xp: 300,  stat: "BRZ", skill: "Minimalist",                  img: "boss-liquidation.jpg",icon: "skill-minimalist.png" },
+  { id: "exit",       act: 1, name: "Exit Cleared",           cond: "Nothing holds you in the UAE anymore",       xp: 500,  stat: "BRZ", skill: "Free Agent",                  img: "boss-exit.jpg",       icon: "skill-freeagent.png" },
+  { id: "portuguese", act: 2, name: "The Portuguese Gate",    cond: "15-minute real conversation with a native",  xp: 300,  stat: "BRZ", skill: "Falante",                     img: "boss-portuguese.jpg", icon: "skill-falante.png" },
+  { id: "landing",    act: 2, name: "Landing in Brazil",      cond: "Feet on Brazilian soil, housing sorted",     xp: 500,  stat: "BRZ", skill: "Gate Crosser",                img: "boss-landing.jpg",    icon: "skill-gatecrosser.png" },
+  { id: "barrier",    act: 3, name: "The Barrier",            cond: "The land stands fully fenced",               xp: 300,  stat: "TER", skill: "Landholder",                  img: "boss-barrier.jpg",    icon: "skill-landholder.png" },
+  { id: "shipwright", act: 3, name: "The Shipwright's Trial", cond: "Boat built or bought, and floating",         xp: 400,  stat: "SEA", skill: "Shipwright",                  img: "boss-shipwright.jpg", icon: "skill-shipwright.png" },
+  { id: "catch",      act: 3, name: "First Catch",            cond: "First real fishing haul brought home",       xp: 300,  stat: "SEA", skill: "Pescador",                    img: "boss-catch.jpg",      icon: "skill-pescador.png" },
+  { id: "sale",       act: 3, name: "FINAL BOSS: First Sale", cond: "First money earned from your own boat",      xp: 1000, stat: "SEA", skill: "Capit\u00E3o",                img: "boss-sale.jpg",       icon: "skill-capitao.png" }
 ];
 
 const KEY = "hunter-system-v1";
 const HKEY = "hunter-key";
 
-// ---------- Helpers ----------
 const xpToNext = l => 100 + (l - 1) * 40;
-
 function levelFromXP(totalXP) {
   let lvl = 1, rem = totalXP;
   while (rem >= xpToNext(lvl)) { rem -= xpToNext(lvl); lvl++; }
   return { level: lvl, into: rem, need: xpToNext(lvl) };
 }
-
-function rankFromLevel(l) {
-  if (l >= 50) return { r: "SS", c: "#FF4D8D" };
-  if (l >= 30) return { r: "S",  c: "#FFD76A" };
-  if (l >= 20) return { r: "A",  c: "#C77DFF" };
-  if (l >= 15) return { r: "B",  c: "#3EE6FF" };
-  if (l >= 10) return { r: "C",  c: "#7CFFB2" };
-  if (l >= 5)  return { r: "D",  c: "#9FB8D9" };
-  return { r: "E", c: "#6B7F9E" };
+const RANKS = [
+  { r: "E",  c: "#6B7F9E", minLvl: 1,  bosses: 0 },
+  { r: "D",  c: "#9FB8D9", minLvl: 5,  bosses: 1 },
+  { r: "C",  c: "#7CFFB2", minLvl: 10, bosses: 2 },
+  { r: "B",  c: "#3EE6FF", minLvl: 15, bosses: 3 },
+  { r: "A",  c: "#C77DFF", minLvl: 20, bosses: 4 },
+  { r: "S",  c: "#FFD76A", minLvl: 30, bosses: 6 },
+  { r: "SS", c: "#FF4D8D", minLvl: 50, bosses: 10 }
+];
+function currentRank(level, bossCount, finalDown) {
+  let byLevel = 0, byBoss = 0;
+  for (let i = 0; i < RANKS.length; i++) {
+    if (level >= RANKS[i].minLvl) byLevel = i;
+    const bossOk = bossCount >= RANKS[i].bosses && (RANKS[i].r !== "S" && RANKS[i].r !== "SS" ? true : finalDown);
+    if (bossOk) byBoss = i;
+  }
+  const idx = Math.min(byLevel, byBoss);
+  return { rank: RANKS[idx], capped: byLevel > byBoss, next: RANKS[Math.min(byLevel, RANKS.length - 1)] };
 }
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const yesterdayStr = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); };
-const esc = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-// ---------- Cloud setup ----------
 const CLOUD_ENABLED = SUPABASE_URL.indexOf("https://") === 0 && SUPABASE_ANON_KEY.length > 40;
 let sb = null;
-if (CLOUD_ENABLED && window.supabase) {
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
+if (CLOUD_ENABLED && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let hunterKey = localStorage.getItem(HKEY) || null;
 
-// ---------- State ----------
-let state = null;
-let editMode = false;
-let toastTimer = null;
-let pushTimer = null;
+let state = null, editMode = false, toastTimer = null, pushTimer = null, activeTab = "quests";
 
 function freshState() {
-  return {
-    totalXP: 0,
-    stats: { INT: 0, LNG: 0, CRE: 0, VIT: 0, CAR: 0 },
-    quests: DEFAULT_QUESTS.map(q => ({ ...q })),
-    streak: 0,
-    lastActiveDate: null,
-    nextId: 6,
-    savedAt: null
-  };
+  return { totalXP: 0, stats: { VIT: 0, INT: 0, CRE: 0, TER: 0, BRZ: 0, SEA: 0 },
+    quests: DEFAULT_QUESTS.map(q => ({ ...q })), streak: 0, lastActiveDate: null, nextId: 7,
+    bosses: {}, savedAt: null, version: 3 };
+}
+
+function migrate(s) {
+  if (!s || typeof s !== "object") return freshState();
+  if (!s.version || s.version < 3) {
+    const old = s.stats || {};
+    s.stats = { VIT: old.VIT || 0, INT: old.INT || 0, CRE: old.CRE || 0,
+                TER: old.TER || old.CAR || 0, BRZ: old.BRZ || old.LNG || 0, SEA: old.SEA || 0 };
+    (s.quests || []).forEach(q => {
+      if (q.stat === "CAR") q.stat = "TER";
+      if (q.stat === "LNG") q.stat = "BRZ";
+      if (!STATS[q.stat]) q.stat = "INT";
+    });
+    s.version = 3;
+  }
+  s.bosses = s.bosses || {};
+  BOSSES.forEach(b => { if (!s.bosses[b.id]) s.bosses[b.id] = { defeated: false, date: null, reward: "", claimed: false }; });
+  return s;
 }
 
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { state = JSON.parse(raw); return; }
-  } catch (e) { /* corrupted save — start fresh */ }
-  state = freshState();
+    if (raw) { state = migrate(JSON.parse(raw)); return; }
+  } catch (e) {}
+  state = migrate(freshState());
 }
 
 function save() {
   state.savedAt = new Date().toISOString();
-  try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch (e) { console.error("Local save failed", e); }
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
   schedulePush();
 }
 
-// ---------- Cloud sync ----------
 function setSync(mode, label) {
   const chip = document.getElementById("syncChip");
   chip.className = "sync-chip" + (mode ? " " + mode : "");
   chip.innerHTML = "&#9729; " + label;
 }
-
-function schedulePush() {
-  if (!sb || !hunterKey) return;
-  clearTimeout(pushTimer);
-  pushTimer = setTimeout(pushCloud, 900);
-}
-
+function schedulePush() { if (!sb || !hunterKey) return; clearTimeout(pushTimer); pushTimer = setTimeout(pushCloud, 900); }
 async function pushCloud() {
   if (!sb || !hunterKey) return;
   setSync("busy", "SYNCING");
   try {
-    const { error } = await sb.from("hunter_saves").upsert({
-      key: hunterKey,
-      data: state,
-      updated_at: state.savedAt || new Date().toISOString()
-    });
+    const { error } = await sb.from("hunter_saves").upsert({ key: hunterKey, data: state, updated_at: state.savedAt || new Date().toISOString() });
     if (error) throw error;
     setSync("on", "SYNCED");
-  } catch (e) {
-    console.error("Push failed", e);
-    setSync("off", "OFFLINE");
-  }
+  } catch (e) { console.error(e); setSync("off", "OFFLINE"); }
 }
-
 async function pullCloud() {
   if (!sb || !hunterKey) return;
   setSync("busy", "SYNCING");
   try {
-    const { data: row, error } = await sb.from("hunter_saves")
-      .select("data, updated_at").eq("key", hunterKey).maybeSingle();
+    const { data: row, error } = await sb.from("hunter_saves").select("data, updated_at").eq("key", hunterKey).maybeSingle();
     if (error) throw error;
     if (row && row.data) {
       const cloudTime = new Date(row.updated_at).getTime();
       const localTime = state && state.savedAt ? new Date(state.savedAt).getTime() : 0;
-      if (cloudTime > localTime) {
-        state = row.data;
-        localStorage.setItem(KEY, JSON.stringify(state));
-        render();
-      } else if (localTime > cloudTime) {
-        await pushCloud();
-        return;
-      }
-    } else {
-      await pushCloud();
-      return;
-    }
+      if (cloudTime > localTime) { state = migrate(row.data); localStorage.setItem(KEY, JSON.stringify(state)); render(); }
+      else if (localTime > cloudTime) { await pushCloud(); return; }
+    } else { await pushCloud(); return; }
     setSync("on", "SYNCED");
-  } catch (e) {
-    console.error("Pull failed", e);
-    setSync("off", "OFFLINE");
-  }
+  } catch (e) { console.error(e); setSync("off", "OFFLINE"); }
 }
-
-// Adopt a key typed by the user: if a cloud save exists under it, the cloud version wins.
 async function adoptKey(newKey) {
   const statusEl = document.getElementById("keyStatus");
   if (!sb) { statusEl.textContent = "Cloud is not configured in this build."; return; }
   statusEl.textContent = "Linking\u2026";
   try {
-    const { data: row, error } = await sb.from("hunter_saves")
-      .select("data, updated_at").eq("key", newKey).maybeSingle();
+    const { data: row, error } = await sb.from("hunter_saves").select("data, updated_at").eq("key", newKey).maybeSingle();
     if (error) throw error;
     hunterKey = newKey;
     localStorage.setItem(HKEY, hunterKey);
     if (row && row.data) {
-      state = row.data;
+      state = migrate(row.data);
       localStorage.setItem(KEY, JSON.stringify(state));
       render();
       statusEl.textContent = "Linked. Cloud save loaded on this device.";
-    } else {
-      await pushCloud();
-      statusEl.textContent = "Linked. This device's save is now in the cloud.";
-    }
+    } else { await pushCloud(); statusEl.textContent = "Linked. This device's save is now in the cloud."; }
     refreshKeyModal();
     setSync("on", "SYNCED");
     notify("DEVICE LINKED \u00B7 SAVE SYNCED");
-  } catch (e) {
-    console.error(e);
-    statusEl.textContent = "Could not reach the cloud. Check your internet and try again.";
-    setSync("off", "OFFLINE");
-  }
+  } catch (e) { console.error(e); statusEl.textContent = "Could not reach the cloud. Check your internet and try again."; setSync("off", "OFFLINE"); }
 }
-
 function generateKey() {
   let k = "";
-  if (window.crypto && crypto.randomUUID) {
-    k = (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, "");
-  } else {
-    for (let i = 0; i < 64; i++) k += Math.floor(Math.random() * 16).toString(16);
-  }
+  if (window.crypto && crypto.randomUUID) k = (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, "");
+  else for (let i = 0; i < 64; i++) k += Math.floor(Math.random() * 16).toString(16);
   return "hunter-" + k;
 }
 
-// ---------- Actions ----------
 function notify(msg) {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.display = "block";
+  t.textContent = msg; t.style.display = "block";
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.style.display = "none"; }, 2600);
 }
@@ -533,7 +431,6 @@ function toggleQuest(id) {
   const today = todayStr();
   const q = state.quests.find(x => x.id === id);
   if (!q) return;
-
   if (q.doneDate === today) {
     q.doneDate = null;
     state.totalXP = Math.max(0, state.totalXP - q.xp);
@@ -549,11 +446,9 @@ function toggleQuest(id) {
       state.lastActiveDate = today;
     }
     const after = levelFromXP(state.totalXP).level;
-    if (after > before) showLevelUp(after);
-    else notify("QUEST COMPLETE \u00B7 +" + q.xp + " XP \u2192 " + q.stat);
+    if (after > before) showLevelUp(after); else notify("QUEST COMPLETE \u00B7 +" + q.xp + " XP \u2192 " + q.stat);
   }
-  save();
-  render();
+  save(); render();
 }
 
 function addQuest() {
@@ -564,15 +459,48 @@ function addQuest() {
   if (!name) return;
   state.quests.push({ id: state.nextId++, name, stat, xp, doneDate: null });
   nameEl.value = "";
-  save();
-  render();
+  save(); render();
   notify("New quest registered");
 }
+function deleteQuest(id) { state.quests = state.quests.filter(q => q.id !== id); save(); render(); }
 
-function deleteQuest(id) {
-  state.quests = state.quests.filter(q => q.id !== id);
-  save();
-  render();
+function defeatBoss(id) {
+  const b = BOSSES.find(x => x.id === id);
+  const bs = state.bosses[id];
+  if (!b || !bs || bs.defeated) return;
+  if (!confirm("Confirm: \"" + b.name + "\" is truly defeated?\n(" + b.cond + ")")) return;
+  bs.defeated = true;
+  bs.date = todayStr();
+  state.totalXP += b.xp;
+  state.stats[b.stat] += b.xp;
+  save(); render();
+  const img = document.getElementById("vicImg");
+  img.style.display = "none";
+  img.onerror = () => { img.style.display = "none"; };
+  img.onload = () => { img.style.display = "block"; };
+  img.src = "./art/" + b.img;
+  document.getElementById("vicName").textContent = b.name;
+  document.getElementById("vicXP").textContent = "+" + b.xp + " XP \u2192 " + b.stat;
+  document.getElementById("vicSkill").textContent = "Skill unlocked: " + b.skill;
+  document.getElementById("victory").style.display = "flex";
+}
+function undoBoss(id) {
+  const b = BOSSES.find(x => x.id === id);
+  const bs = state.bosses[id];
+  if (!b || !bs || !bs.defeated) return;
+  if (!confirm("Revert \"" + b.name + "\"? XP will be removed.")) return;
+  bs.defeated = false; bs.date = null; bs.claimed = false;
+  state.totalXP = Math.max(0, state.totalXP - b.xp);
+  state.stats[b.stat] = Math.max(0, state.stats[b.stat] - b.xp);
+  save(); render();
+}
+function setReward(id, text) { state.bosses[id].reward = text.slice(0, 80); save(); }
+function claimReward(id) {
+  const bs = state.bosses[id];
+  if (!bs.defeated) return;
+  bs.claimed = !bs.claimed;
+  save(); render();
+  if (bs.claimed) notify("REWARD CLAIMED \u00B7 you earned it");
 }
 
 function showLevelUp(lvl) {
@@ -580,77 +508,100 @@ function showLevelUp(lvl) {
   document.getElementById("levelup").style.display = "flex";
 }
 
-// ---------- Render ----------
 function render() {
   const today = todayStr();
   const { level, into, need } = levelFromXP(state.totalXP);
-  const rank = rankFromLevel(level);
+  const bossCount = BOSSES.filter(b => state.bosses[b.id] && state.bosses[b.id].defeated).length;
+  const finalDown = state.bosses.sale && state.bosses.sale.defeated;
+  const { rank, capped, next } = currentRank(level, bossCount, finalDown);
 
   const badge = document.getElementById("rankBadge");
   badge.style.border = "1px solid " + rank.c;
   badge.style.boxShadow = "0 0 16px " + rank.c + "44";
   const letter = document.getElementById("rankLetter");
-  letter.textContent = rank.r;
-  letter.style.color = rank.c;
+  letter.textContent = rank.r; letter.style.color = rank.c;
+
+  const hint = document.getElementById("rankHint");
+  if (capped) {
+    hint.style.display = "block";
+    hint.textContent = "\u26A0 Rank " + next.r + " requires " + next.bosses + " boss" + (next.bosses > 1 ? "es" : "") + " defeated \u2014 levels alone are not enough, hunter.";
+  } else hint.style.display = "none";
 
   document.getElementById("lvlText").textContent = "LV. " + level;
   document.getElementById("xpFill").style.width = Math.round((into / need) * 100) + "%";
   document.getElementById("xpInto").textContent = "XP " + into + " / " + need;
   document.getElementById("xpTotal").textContent = "TOTAL " + state.totalXP + " XP";
-
   const done = state.quests.filter(q => q.doneDate === today).length;
   document.getElementById("streakText").textContent = state.streak + (state.streak === 1 ? " day" : " days");
   document.getElementById("todayText").textContent = done + "/" + state.quests.length;
+  document.getElementById("bossCount").textContent = bossCount + "/" + BOSSES.length;
 
   document.getElementById("statsGrid").innerHTML = Object.entries(STATS).map(([key, s]) => {
     const xp = state.stats[key] || 0;
-    const sl = Math.floor(xp / 100) + 1;
-    const sp = xp % 100;
-    return '<div class="stat-card">' +
-      '<div class="stat-top"><span class="stat-name" style="color:' + s.color + '">' + key + ' &middot; ' + s.name + '</span>' +
-      '<span class="stat-lvl mono">Lv ' + sl + '</span></div>' +
-      '<div class="stat-desc">' + s.desc + '</div>' +
-      '<div class="stat-track"><div class="stat-fill" style="width:' + sp + '%;background:' + s.color + ';box-shadow:0 0 8px ' + s.color + '66"></div></div>' +
-      '</div>';
+    const sl = Math.floor(xp / 100) + 1, sp = xp % 100;
+    return '<div class="stat-card"><div class="stat-top"><span class="stat-name" style="color:' + s.color + '">' + key + ' &middot; ' + s.name + '</span><span class="stat-lvl mono">Lv ' + sl + '</span></div><div class="stat-desc">' + s.desc + '</div><div class="stat-track"><div class="stat-fill" style="width:' + sp + '%;background:' + s.color + ';box-shadow:0 0 8px ' + s.color + '66"></div></div></div>';
   }).join("");
 
   document.getElementById("questList").innerHTML = state.quests.map(q => {
     const isDone = q.doneDate === today;
     const color = (STATS[q.stat] || {}).color || "#9FB8D9";
-    return '<div class="quest' + (isDone ? " done" : "") + '">' +
-      '<button class="quest-check" data-toggle="' + q.id + '" aria-label="' + (isDone ? "Undo quest" : "Complete quest") + '">' + (isDone ? "\u2713" : "") + '</button>' +
-      '<div class="quest-name">' + esc(q.name) + '</div>' +
-      '<div class="quest-xp mono" style="color:' + color + '">+' + q.xp + ' ' + q.stat + '</div>' +
-      (editMode ? '<button class="btn-del" data-del="' + q.id + '" aria-label="Delete quest">\u2715</button>' : "") +
-      '</div>';
+    return '<div class="quest' + (isDone ? " done" : "") + '"><button class="quest-check" data-toggle="' + q.id + '">' + (isDone ? "\u2713" : "") + '</button><div class="quest-name">' + esc(q.name) + '</div><div class="quest-xp mono" style="color:' + color + '">+' + q.xp + ' ' + q.stat + '</div>' + (editMode ? '<button class="btn-del" data-del="' + q.id + '">\u2715</button>' : "") + '</div>';
+  }).join("");
+
+  let bossHTML = "";
+  [1, 2, 3].forEach(act => {
+    bossHTML += '<div class="act-title mono">' + ACTS[act] + '</div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">';
+    BOSSES.filter(b => b.act === act).forEach(b => {
+      const bs = state.bosses[b.id];
+      const d = bs.defeated;
+      bossHTML += '<div class="boss' + (d ? " defeated" : "") + '">' +
+        '<img class="boss-art" src="./art/' + b.img + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
+        '<div class="boss-ph" style="display:none;">\u2694</div>' +
+        '<div class="boss-info"><div class="boss-name">' + esc(b.name) + (d ? ' \u2713' : '') + '</div>' +
+        '<div class="boss-cond">' + esc(b.cond) + '</div>' +
+        '<div class="boss-meta mono">+' + b.xp + ' XP \u2192 ' + b.stat + ' \u00B7 drops: ' + esc(b.skill) + (d && bs.date ? ' \u00B7 defeated ' + bs.date : '') + '</div></div>' +
+        (d ? '<button class="btn-undo" data-undoboss="' + b.id + '">UNDO</button>'
+           : '<button class="btn-fight" data-fight="' + b.id + '">DEFEAT</button>') +
+        '</div>';
+    });
+    bossHTML += '</div>';
+  });
+  document.getElementById("bossList").innerHTML = bossHTML;
+
+  document.getElementById("skillsGrid").innerHTML = BOSSES.map(b => {
+    const d = state.bosses[b.id].defeated;
+    const glyph = b.skill.charAt(0);
+    return '<div class="skill' + (d ? "" : " locked") + '">' +
+      '<img class="skill-icon" src="./art/' + b.icon + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
+      '<div class="skill-glyph" style="display:none;">' + esc(glyph) + '</div>' +
+      '<div class="skill-name">' + esc(b.skill) + '</div>' +
+      '<div class="skill-src mono">' + (d ? "ACQUIRED" : "LOCKED \u00B7 " + esc(b.name)) + '</div></div>';
+  }).join("");
+
+  document.getElementById("vaultList").innerHTML = BOSSES.map(b => {
+    const bs = state.bosses[b.id];
+    return '<div class="vault-row"><div class="vault-boss mono">' + esc(b.name) + '</div>' +
+      '<input type="text" maxlength="80" placeholder="Declare your reward\u2026" value="' + esc(bs.reward || "") + '" data-reward="' + b.id + '">' +
+      '<button class="btn-claim' + (bs.claimed ? " claimed" : "") + '" data-claim="' + b.id + '" ' + (bs.defeated ? "" : "disabled") + '>' + (bs.claimed ? "CLAIMED \u2713" : "CLAIM") + '</button></div>';
   }).join("");
 }
 
-// ---------- Key modal ----------
-function refreshKeyModal() {
-  const section = document.getElementById("keySection");
-  const display = document.getElementById("keyDisplay");
-  if (hunterKey) {
-    section.style.display = "block";
-    display.textContent = hunterKey;
-  } else {
-    section.style.display = "none";
-  }
-}
-
-function openKeyModal() {
-  refreshKeyModal();
-  document.getElementById("keyStatus").textContent = CLOUD_ENABLED
-    ? "" : "Cloud is not configured yet (Supabase keys missing in index.html).";
-  document.getElementById("keyModal").style.display = "flex";
-}
-
-// ---------- Wire up ----------
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-toggle],[data-del]");
+  const t = e.target.closest("[data-toggle],[data-del],[data-fight],[data-undoboss],[data-claim],[data-tab]");
   if (!t) return;
   if (t.dataset.toggle) toggleQuest(Number(t.dataset.toggle));
   if (t.dataset.del) deleteQuest(Number(t.dataset.del));
+  if (t.dataset.fight) defeatBoss(t.dataset.fight);
+  if (t.dataset.undoboss) undoBoss(t.dataset.undoboss);
+  if (t.dataset.claim) claimReward(t.dataset.claim);
+  if (t.dataset.tab) {
+    activeTab = t.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === activeTab));
+    document.querySelectorAll(".tabpane").forEach(p => p.classList.toggle("active", p.id === "tab-" + activeTab));
+  }
+});
+document.addEventListener("change", e => {
+  if (e.target.dataset && e.target.dataset.reward) setReward(e.target.dataset.reward, e.target.value);
 });
 document.getElementById("btnAdd").addEventListener("click", addQuest);
 document.getElementById("qName").addEventListener("keydown", e => { if (e.key === "Enter") addQuest(); });
@@ -659,55 +610,40 @@ document.getElementById("btnEdit").addEventListener("click", () => {
   document.getElementById("btnEdit").textContent = editMode ? "DONE" : "EDIT";
   render();
 });
-document.getElementById("levelup").addEventListener("click", () => {
-  document.getElementById("levelup").style.display = "none";
-});
+document.getElementById("levelup").addEventListener("click", () => document.getElementById("levelup").style.display = "none");
+document.getElementById("victory").addEventListener("click", () => document.getElementById("victory").style.display = "none");
 document.getElementById("syncChip").addEventListener("click", openKeyModal);
-document.getElementById("btnCloseKey").addEventListener("click", () => {
-  document.getElementById("keyModal").style.display = "none";
-});
-document.getElementById("btnGenKey").addEventListener("click", () => {
-  adoptKey(generateKey());
-});
+document.getElementById("btnCloseKey").addEventListener("click", () => document.getElementById("keyModal").style.display = "none");
+document.getElementById("btnGenKey").addEventListener("click", () => adoptKey(generateKey()));
 document.getElementById("btnLinkKey").addEventListener("click", () => {
   const v = document.getElementById("keyInput").value.trim();
-  if (v.length < 20) {
-    document.getElementById("keyStatus").textContent = "That key looks too short \u2014 paste the full key.";
-    return;
-  }
+  if (v.length < 20) { document.getElementById("keyStatus").textContent = "That key looks too short \u2014 paste the full key."; return; }
   adoptKey(v);
 });
 document.getElementById("keyDisplay").addEventListener("click", function () {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(this.textContent).then(() => notify("KEY COPIED"));
-  }
+  if (navigator.clipboard) navigator.clipboard.writeText(this.textContent).then(() => notify("KEY COPIED"));
 });
-
-// Stat dropdown options
-document.getElementById("qStat").innerHTML =
-  Object.keys(STATS).map(k => '<option value="' + k + '">' + k + '</option>').join("");
-
-// Re-sync when returning to the app or coming back online
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") pullCloud();
-});
+function refreshKeyModal() {
+  const section = document.getElementById("keySection");
+  if (hunterKey) { section.style.display = "block"; document.getElementById("keyDisplay").textContent = hunterKey; }
+  else section.style.display = "none";
+}
+function openKeyModal() {
+  refreshKeyModal();
+  document.getElementById("keyStatus").textContent = CLOUD_ENABLED ? "" : "Cloud is not configured yet (Supabase keys missing in index.html).";
+  document.getElementById("keyModal").style.display = "flex";
+}
+document.getElementById("qStat").innerHTML = Object.keys(STATS).map(k => '<option value="' + k + '">' + k + '</option>').join("");
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pullCloud(); });
 window.addEventListener("online", pullCloud);
 window.addEventListener("offline", () => { if (sb && hunterKey) setSync("off", "OFFLINE"); });
 
-// ---------- Boot ----------
 load();
 render();
+if (!CLOUD_ENABLED) setSync("", "LOCAL ONLY");
+else if (!hunterKey) { setSync("", "NOT LINKED"); openKeyModal(); }
+else pullCloud();
 
-if (!CLOUD_ENABLED) {
-  setSync("", "LOCAL ONLY");
-} else if (!hunterKey) {
-  setSync("", "NOT LINKED");
-  openKeyModal(); // first run: invite the hunter to create or link a key
-} else {
-  pullCloud();
-}
-
-// Service worker for offline + install support
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(err => console.log("SW registration failed", err));
