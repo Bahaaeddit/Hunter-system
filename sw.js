@@ -1,4 +1,4 @@
-// Hunter System — service worker (v2: cloud sync build)
+// Hunter System — service worker (v3: boss campaign build)
 
 const CACHE = "hunter-system-v3";
 const ASSETS = [
@@ -27,11 +27,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
-  // Let cross-origin requests (Supabase API, fonts, CDN) go straight to the network.
   if (url.origin !== self.location.origin) return;
-
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
