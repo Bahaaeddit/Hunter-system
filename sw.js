@@ -1,7 +1,6 @@
-// Hunter System — service worker
-// Caches the app shell so it opens instantly, even offline.
+// Hunter System — service worker (v2: cloud sync build)
 
-const CACHE = "hunter-system-v1";
+const CACHE = "hunter-system-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -28,6 +27,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  const url = new URL(event.request.url);
+  // Let cross-origin requests (Supabase API, fonts, CDN) go straight to the network.
+  if (url.origin !== self.location.origin) return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;

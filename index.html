@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
 
@@ -87,9 +88,20 @@
   }
   .xp-numbers { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 
-  .meta-row { display: flex; gap: 20px; margin-top: 12px; font-size: 12px; color: #9FB8D9; flex-wrap: wrap; }
+  .meta-row { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: #9FB8D9; flex-wrap: wrap; align-items: center; }
   .meta-row b.fire { color: #FF8A5C; }
   .meta-row b.cy { color: var(--cyan); }
+
+  .sync-chip {
+    margin-left: auto; cursor: pointer; background: none;
+    border: 1px solid rgba(62,230,255,0.3); color: #9FB8D9;
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    padding: 3px 10px; letter-spacing: 0.1em;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .sync-chip.on { color: var(--green); border-color: rgba(124,255,178,0.4); }
+  .sync-chip.busy { color: var(--gold); border-color: rgba(255,215,106,0.4); }
+  .sync-chip.off { color: var(--pink); border-color: rgba(255,77,141,0.4); }
 
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
   .stat-card {
@@ -166,13 +178,15 @@
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: rgba(6,18,31,0.95); border: 1px solid var(--cyan); color: var(--cyan);
     padding: 10px 20px; font-size: 13px; letter-spacing: 0.12em;
-    box-shadow: 0 0 20px rgba(62,230,255,0.3); z-index: 50; display: none;
+    box-shadow: 0 0 20px rgba(62,230,255,0.3); z-index: 200; display: none;
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    max-width: 92vw; text-align: center;
   }
 
-  #levelup {
+  .overlay {
     position: fixed; inset: 0; background: rgba(4,8,18,0.85);
-    display: none; align-items: center; justify-content: center; z-index: 100; cursor: pointer;
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    padding: 16px;
   }
   .levelup-box {
     clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
@@ -188,6 +202,39 @@
   }
   .levelup-sub { font-size: 16px; color: var(--text-bright); }
   .levelup-hint { font-size: 11px; color: var(--text-dim); margin-top: 16px; letter-spacing: 0.2em; }
+
+  .key-box {
+    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    padding: 26px 24px; max-width: 460px; width: 100%;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(160deg, rgba(10,22,44,0.97), rgba(6,12,26,0.99));
+    box-shadow: 0 0 40px rgba(62,230,255,0.2);
+  }
+  .key-display {
+    margin: 10px 0; padding: 10px 12px; font-size: 12px; word-break: break-all;
+    background: rgba(62,230,255,0.06); border: 1px dashed rgba(62,230,255,0.35);
+    color: var(--cyan); cursor: pointer; user-select: all;
+  }
+  .key-note { font-size: 12px; color: var(--text-dim); margin: 8px 0; line-height: 1.5; }
+  .key-input {
+    width: 100%; margin-top: 8px;
+    background: rgba(62,230,255,0.05); border: 1px solid rgba(62,230,255,0.25);
+    color: var(--text-bright); padding: 9px 12px; font-size: 13px;
+    font-family: 'Share Tech Mono', monospace;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .key-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-cyan {
+    background: linear-gradient(90deg, #1FB6E0, #3EE6FF); border: none;
+    color: #04121F; font-weight: 700; padding: 9px 16px; cursor: pointer;
+    letter-spacing: 0.06em; font-family: inherit; font-size: 13px; flex: 1;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .btn-ghost {
+    background: none; border: 1px solid rgba(62,230,255,0.35); color: var(--text);
+    padding: 9px 16px; cursor: pointer; font-family: inherit; font-size: 13px; flex: 1;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
 
   button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 </style>
@@ -217,7 +264,8 @@
     </div>
     <div class="meta-row mono">
       <span>&#128293; STREAK: <b class="fire" id="streakText">0 days</b></span>
-      <span>&#128203; TODAY: <b class="cy" id="todayText">0/0</b> quests</span>
+      <span>&#128203; TODAY: <b class="cy" id="todayText">0/0</b></span>
+      <button class="sync-chip" id="syncChip" title="Cloud sync settings">&#9729; LOCAL ONLY</button>
     </div>
   </div>
 
@@ -242,12 +290,13 @@
     </div>
   </div>
 
-  <div class="footer-note mono">QUESTS RESET DAILY &middot; PROGRESS SAVED ON THIS DEVICE</div>
+  <div class="footer-note mono">QUESTS RESET DAILY &middot; TAP THE CLOUD CHIP TO SYNC DEVICES</div>
 </div>
 
 <div id="toast" class="mono"></div>
 
-<div id="levelup">
+<!-- Level up -->
+<div id="levelup" class="overlay">
   <div class="levelup-box rise">
     <div class="levelup-tag mono pulse">&#9672; SYSTEM NOTIFICATION &#9672;</div>
     <div class="levelup-big">LEVEL UP</div>
@@ -256,7 +305,38 @@
   </div>
 </div>
 
+<!-- Hunter Key / sync settings -->
+<div id="keyModal" class="overlay">
+  <div class="key-box rise">
+    <div class="sys-title mono pulse">&#9672; CLOUD SYNC &middot; HUNTER KEY &#9672;</div>
+    <div class="key-note">
+      Your Hunter Key links your save file across devices. Generate it once, then
+      enter the same key on your other device. <b style="color:var(--gold)">Keep it secret</b> —
+      anyone with this key can access this save.
+    </div>
+    <div id="keySection" style="display:none;">
+      <div class="key-note" style="margin-bottom:2px;">YOUR KEY (tap to select, then copy):</div>
+      <div class="key-display mono" id="keyDisplay"></div>
+    </div>
+    <input type="text" id="keyInput" class="key-input" placeholder="Paste a key from your other device&hellip;" autocomplete="off">
+    <div class="key-actions">
+      <button class="btn-cyan" id="btnLinkKey">LINK THIS KEY</button>
+      <button class="btn-ghost" id="btnGenKey">GENERATE NEW</button>
+      <button class="btn-ghost" id="btnCloseKey" style="flex:0 1 auto;">CLOSE</button>
+    </div>
+    <div class="key-note" id="keyStatus" style="margin-top:10px;"></div>
+  </div>
+</div>
+
 <script>
+// ============================================================
+//  CLOUD SYNC CONFIG — PASTE YOUR TWO SUPABASE VALUES BELOW
+//  (Supabase -> Project Settings -> API)
+// ============================================================
+const SUPABASE_URL = "https://tdfppuhzqngqjhruticf.supabase.co/rest/v1/";      // looks like: https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnBwdWh6cW5ncWpocnV0aWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTE1MzcsImV4cCI6MjA5OTQyNzUzN30.FlTB7sM978K0koAIsxprnwhSm7X0cuB9CCSAe-6f450";    // the long "anon public" key
+// ============================================================
+
 // ---------- Config ----------
 const STATS = {
   INT: { name: "Intelligence", desc: "Data Science / IBM cert", color: "#3EE6FF" },
@@ -275,6 +355,7 @@ const DEFAULT_QUESTS = [
 ];
 
 const KEY = "hunter-system-v1";
+const HKEY = "hunter-key";
 
 // ---------- Helpers ----------
 const xpToNext = l => 100 + (l - 1) * 40;
@@ -299,29 +380,144 @@ const todayStr = () => new Date().toISOString().slice(0, 10);
 const yesterdayStr = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); };
 const esc = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+// ---------- Cloud setup ----------
+const CLOUD_ENABLED = SUPABASE_URL.indexOf("https://") === 0 && SUPABASE_ANON_KEY.length > 40;
+let sb = null;
+if (CLOUD_ENABLED && window.supabase) {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+let hunterKey = localStorage.getItem(HKEY) || null;
+
 // ---------- State ----------
 let state = null;
 let editMode = false;
 let toastTimer = null;
+let pushTimer = null;
+
+function freshState() {
+  return {
+    totalXP: 0,
+    stats: { INT: 0, LNG: 0, CRE: 0, VIT: 0, CAR: 0 },
+    quests: DEFAULT_QUESTS.map(q => ({ ...q })),
+    streak: 0,
+    lastActiveDate: null,
+    nextId: 6,
+    savedAt: null
+  };
+}
 
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) { state = JSON.parse(raw); return; }
   } catch (e) { /* corrupted save — start fresh */ }
-  state = {
-    totalXP: 0,
-    stats: { INT: 0, LNG: 0, CRE: 0, VIT: 0, CAR: 0 },
-    quests: DEFAULT_QUESTS.map(q => ({ ...q })),
-    streak: 0,
-    lastActiveDate: null,
-    nextId: 6
-  };
+  state = freshState();
 }
 
 function save() {
+  state.savedAt = new Date().toISOString();
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch (e) { console.error("Save failed", e); }
+  catch (e) { console.error("Local save failed", e); }
+  schedulePush();
+}
+
+// ---------- Cloud sync ----------
+function setSync(mode, label) {
+  const chip = document.getElementById("syncChip");
+  chip.className = "sync-chip" + (mode ? " " + mode : "");
+  chip.innerHTML = "&#9729; " + label;
+}
+
+function schedulePush() {
+  if (!sb || !hunterKey) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushCloud, 900);
+}
+
+async function pushCloud() {
+  if (!sb || !hunterKey) return;
+  setSync("busy", "SYNCING");
+  try {
+    const { error } = await sb.from("hunter_saves").upsert({
+      key: hunterKey,
+      data: state,
+      updated_at: state.savedAt || new Date().toISOString()
+    });
+    if (error) throw error;
+    setSync("on", "SYNCED");
+  } catch (e) {
+    console.error("Push failed", e);
+    setSync("off", "OFFLINE");
+  }
+}
+
+async function pullCloud() {
+  if (!sb || !hunterKey) return;
+  setSync("busy", "SYNCING");
+  try {
+    const { data: row, error } = await sb.from("hunter_saves")
+      .select("data, updated_at").eq("key", hunterKey).maybeSingle();
+    if (error) throw error;
+    if (row && row.data) {
+      const cloudTime = new Date(row.updated_at).getTime();
+      const localTime = state && state.savedAt ? new Date(state.savedAt).getTime() : 0;
+      if (cloudTime > localTime) {
+        state = row.data;
+        localStorage.setItem(KEY, JSON.stringify(state));
+        render();
+      } else if (localTime > cloudTime) {
+        await pushCloud();
+        return;
+      }
+    } else {
+      await pushCloud();
+      return;
+    }
+    setSync("on", "SYNCED");
+  } catch (e) {
+    console.error("Pull failed", e);
+    setSync("off", "OFFLINE");
+  }
+}
+
+// Adopt a key typed by the user: if a cloud save exists under it, the cloud version wins.
+async function adoptKey(newKey) {
+  const statusEl = document.getElementById("keyStatus");
+  if (!sb) { statusEl.textContent = "Cloud is not configured in this build."; return; }
+  statusEl.textContent = "Linking\u2026";
+  try {
+    const { data: row, error } = await sb.from("hunter_saves")
+      .select("data, updated_at").eq("key", newKey).maybeSingle();
+    if (error) throw error;
+    hunterKey = newKey;
+    localStorage.setItem(HKEY, hunterKey);
+    if (row && row.data) {
+      state = row.data;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      render();
+      statusEl.textContent = "Linked. Cloud save loaded on this device.";
+    } else {
+      await pushCloud();
+      statusEl.textContent = "Linked. This device's save is now in the cloud.";
+    }
+    refreshKeyModal();
+    setSync("on", "SYNCED");
+    notify("DEVICE LINKED \u00B7 SAVE SYNCED");
+  } catch (e) {
+    console.error(e);
+    statusEl.textContent = "Could not reach the cloud. Check your internet and try again.";
+    setSync("off", "OFFLINE");
+  }
+}
+
+function generateKey() {
+  let k = "";
+  if (window.crypto && crypto.randomUUID) {
+    k = (crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, "");
+  } else {
+    for (let i = 0; i < 64; i++) k += Math.floor(Math.random() * 16).toString(16);
+  }
+  return "hunter-" + k;
 }
 
 // ---------- Actions ----------
@@ -406,7 +602,6 @@ function render() {
   document.getElementById("streakText").textContent = state.streak + (state.streak === 1 ? " day" : " days");
   document.getElementById("todayText").textContent = done + "/" + state.quests.length;
 
-  // Stats grid
   document.getElementById("statsGrid").innerHTML = Object.entries(STATS).map(([key, s]) => {
     const xp = state.stats[key] || 0;
     const sl = Math.floor(xp / 100) + 1;
@@ -419,7 +614,6 @@ function render() {
       '</div>';
   }).join("");
 
-  // Quest list
   document.getElementById("questList").innerHTML = state.quests.map(q => {
     const isDone = q.doneDate === today;
     const color = (STATS[q.stat] || {}).color || "#9FB8D9";
@@ -430,6 +624,25 @@ function render() {
       (editMode ? '<button class="btn-del" data-del="' + q.id + '" aria-label="Delete quest">\u2715</button>' : "") +
       '</div>';
   }).join("");
+}
+
+// ---------- Key modal ----------
+function refreshKeyModal() {
+  const section = document.getElementById("keySection");
+  const display = document.getElementById("keyDisplay");
+  if (hunterKey) {
+    section.style.display = "block";
+    display.textContent = hunterKey;
+  } else {
+    section.style.display = "none";
+  }
+}
+
+function openKeyModal() {
+  refreshKeyModal();
+  document.getElementById("keyStatus").textContent = CLOUD_ENABLED
+    ? "" : "Cloud is not configured yet (Supabase keys missing in index.html).";
+  document.getElementById("keyModal").style.display = "flex";
 }
 
 // ---------- Wire up ----------
@@ -449,16 +662,52 @@ document.getElementById("btnEdit").addEventListener("click", () => {
 document.getElementById("levelup").addEventListener("click", () => {
   document.getElementById("levelup").style.display = "none";
 });
+document.getElementById("syncChip").addEventListener("click", openKeyModal);
+document.getElementById("btnCloseKey").addEventListener("click", () => {
+  document.getElementById("keyModal").style.display = "none";
+});
+document.getElementById("btnGenKey").addEventListener("click", () => {
+  adoptKey(generateKey());
+});
+document.getElementById("btnLinkKey").addEventListener("click", () => {
+  const v = document.getElementById("keyInput").value.trim();
+  if (v.length < 20) {
+    document.getElementById("keyStatus").textContent = "That key looks too short \u2014 paste the full key.";
+    return;
+  }
+  adoptKey(v);
+});
+document.getElementById("keyDisplay").addEventListener("click", function () {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(this.textContent).then(() => notify("KEY COPIED"));
+  }
+});
 
 // Stat dropdown options
 document.getElementById("qStat").innerHTML =
   Object.keys(STATS).map(k => '<option value="' + k + '">' + k + '</option>').join("");
 
+// Re-sync when returning to the app or coming back online
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") pullCloud();
+});
+window.addEventListener("online", pullCloud);
+window.addEventListener("offline", () => { if (sb && hunterKey) setSync("off", "OFFLINE"); });
+
 // ---------- Boot ----------
 load();
 render();
 
-// Register service worker for offline + install support
+if (!CLOUD_ENABLED) {
+  setSync("", "LOCAL ONLY");
+} else if (!hunterKey) {
+  setSync("", "NOT LINKED");
+  openKeyModal(); // first run: invite the hunter to create or link a key
+} else {
+  pullCloud();
+}
+
+// Service worker for offline + install support
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(err => console.log("SW registration failed", err));
