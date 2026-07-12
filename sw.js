@@ -1,6 +1,6 @@
 // Hunter System — service worker (v2: cloud sync build)
 
-const CACHE = "hunter-system-v2";
+const CACHE = "hunter-system-v3";
 const ASSETS = [
   "./",
   "./index.html",
