@@ -45,8 +45,8 @@
   .sync-chip.on{color:var(--green);border-color:rgba(124,255,178,.4)}
   .sync-chip.busy{color:var(--gold);border-color:rgba(255,215,106,.4)}
   .sync-chip.off{color:var(--pink);border-color:rgba(255,77,141,.4)}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;}
-  .tab-btn{flex:1;min-width:90px;cursor:pointer;background:rgba(62,230,255,.04);border:1px solid rgba(62,230,255,.25);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.15em;padding:10px 6px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab-btn{flex:1;min-width:72px;cursor:pointer;background:rgba(62,230,255,.04);border:1px solid rgba(62,230,255,.25);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.12em;padding:10px 4px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
   .tab-btn.active{color:#04121F;background:linear-gradient(90deg,#1FB6E0,#3EE6FF);border-color:transparent;font-weight:700;}
   .tabpane{display:none;flex-direction:column;gap:16px;}
   .tabpane.active{display:flex;}
@@ -99,6 +99,18 @@
   .btn-claim{background:none;border:1px solid rgba(255,215,106,.5);color:var(--gold);padding:6px 12px;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
   .btn-claim:disabled{opacity:.3;cursor:default;}
   .btn-claim.claimed{background:var(--gold);color:#2A1600;font-weight:700;}
+  .fg-label{font-size:11px;letter-spacing:.2em;color:var(--gold);margin:16px 0 6px;font-family:'Share Tech Mono',monospace;}
+  .fg-label:first-child{margin-top:0;}
+  .fg-note{font-size:12px;color:var(--dim);margin-bottom:6px;line-height:1.4;}
+  .fg-input{width:100%;background:rgba(62,230,255,.05);border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:9px 12px;font-size:14px;font-family:inherit;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .fg-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .file-btn{display:inline-block;cursor:pointer;background:none;border:1px solid rgba(62,230,255,.35);color:var(--text);padding:8px 14px;font-size:13px;font-family:inherit;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .thumb{width:72px;height:46px;object-fit:cover;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .thumb-sq{width:46px;height:46px;object-fit:cover;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .camp-row{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid rgba(62,230,255,.18);background:rgba(62,230,255,.03);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);flex-wrap:wrap;font-size:13px;}
+  .art-row{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid rgba(62,230,255,.15);background:rgba(62,230,255,.02);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);flex-wrap:wrap;}
+  .art-name{flex:1;min-width:130px;font-size:13px;color:var(--bright);}
+  .btn-mini{background:none;border:1px solid rgba(62,230,255,.35);color:var(--text);padding:5px 10px;cursor:pointer;font-size:11px;font-family:'Share Tech Mono',monospace;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);}
   .footer-note{text-align:center;font-size:10px;color:var(--faint);letter-spacing:.3em;}
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(6,18,31,.95);border:1px solid var(--cyan);color:var(--cyan);padding:10px 20px;font-size:13px;letter-spacing:.12em;box-shadow:0 0 20px rgba(62,230,255,.3);z-index:200;display:none;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);max-width:92vw;text-align:center;}
   .overlay{position:fixed;inset:0;background:rgba(4,8,18,.88);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
@@ -157,6 +169,7 @@
     <button class="tab-btn" data-tab="bosses">BOSSES</button>
     <button class="tab-btn" data-tab="skills">SKILLS</button>
     <button class="tab-btn" data-tab="vault">VAULT</button>
+    <button class="tab-btn" data-tab="forge">FORGE</button>
   </div>
 
   <div class="tabpane active" id="tab-quests">
@@ -198,6 +211,66 @@
       <div class="section-title mono">&#9656; REWARD VAULT</div>
       <div class="key-note">Declare each boss reward BEFORE the fight. Claim it only after the boss falls.</div>
       <div id="vaultList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-forge">
+    <div class="panel">
+      <div class="section-title mono">&#9656; THE FORGE &middot; CREATE A CAMPAIGN</div>
+      <div class="fg-note">Define a complete goal: its daily quests, its boss, the skill it drops, and its reward. Everything flows to the dashboard automatically.</div>
+
+      <div class="fg-label">1 &middot; THE GOAL</div>
+      <div class="fg-row">
+        <input class="fg-input" style="flex:2;min-width:180px;" type="text" id="fgName" placeholder="Goal name (e.g. Get my driving license)" maxlength="60">
+        <select id="fgStat" style="background:#0A1628;border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:9px 10px;font-size:13px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);"></select>
+      </div>
+
+      <div class="fg-label">2 &middot; DAILY QUESTS</div>
+      <div class="fg-note">The repeatable habits that chip away at this goal.</div>
+      <div class="fg-row">
+        <input class="fg-input" style="flex:2;min-width:160px;" type="text" id="fgQuestName" placeholder="Quest name&hellip;" maxlength="80">
+        <input type="number" id="fgQuestXP" min="5" max="100" value="20" style="width:70px;background:#0A1628;border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:9px 10px;font-size:13px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);">
+        <button class="btn-add" id="btnFgQuest">+ QUEST</button>
+      </div>
+      <div id="fgQuestList" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+
+      <div class="fg-label">3 &middot; THE BOSS</div>
+      <div class="fg-row">
+        <input class="fg-input" style="flex:2;min-width:160px;" type="text" id="fgBossName" placeholder="Boss name (default: goal name)" maxlength="60">
+        <input type="number" id="fgBossXP" min="100" max="1000" value="300" style="width:80px;background:#0A1628;border:1px solid rgba(62,230,255,.25);color:var(--bright);padding:9px 10px;font-size:13px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);">
+      </div>
+      <div style="height:8px;"></div>
+      <input class="fg-input" type="text" id="fgBossCond" placeholder="Defeat condition (how do you KNOW it's done?)" maxlength="100">
+
+      <div class="fg-label">4 &middot; SKILL IT DROPS</div>
+      <input class="fg-input" type="text" id="fgSkill" placeholder="Permanent skill name (e.g. Licensed Driver)" maxlength="50">
+
+      <div class="fg-label">5 &middot; VAULT REWARD</div>
+      <input class="fg-input" type="text" id="fgReward" placeholder="Declare your reward for defeating this boss&hellip;" maxlength="80">
+
+      <div class="fg-label">6 &middot; ART (OPTIONAL)</div>
+      <div class="fg-note">Upload from your device. Images are compressed, saved into your cloud save, and sync to all devices. You can also add them later.</div>
+      <div class="fg-row">
+        <label class="file-btn">BOSS ART <input type="file" id="fgBossArt" accept="image/*" style="display:none;"></label>
+        <img class="thumb" id="fgBossThumb" style="display:none;" alt="">
+        <label class="file-btn">SKILL ICON <input type="file" id="fgSkillArt" accept="image/*" style="display:none;"></label>
+        <img class="thumb-sq" id="fgSkillThumb" style="display:none;" alt="">
+      </div>
+
+      <div style="height:18px;"></div>
+      <button class="btn-cyan" id="btnForge" style="width:100%;">&#9874; FORGE CAMPAIGN</button>
+    </div>
+
+    <div class="panel">
+      <div class="section-title mono">&#9656; MY CAMPAIGNS</div>
+      <div id="campList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title mono">&#9656; ARTWORK MANAGER</div>
+      <div class="fg-note">Add or replace art for any boss or skill — straight from your device, no GitHub needed.</div>
+      <div id="artList" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+      <input type="file" id="artFile" accept="image/*" style="display:none;">
     </div>
   </div>
 
@@ -248,17 +321,17 @@
 // ============================================================
 //  CLOUD SYNC CONFIG — PASTE YOUR TWO SUPABASE VALUES BELOW
 // ============================================================
-const SUPABASE_URL = "https://tdfppuhzqngqjhruticf.supabase.co";      // looks like: https://abcdefgh.supabase.co
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnBwdWh6cW5ncWpocnV0aWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTE1MzcsImV4cCI6MjA5OTQyNzUzN30.FlTB7sM978K0koAIsxprnwhSm7X0cuB9CCSAe-6f450";    // the long "anon public" key
+const SUPABASE_URL = "https://tdfppuhzqngqjhruticf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnBwdWh6cW5ncWpocnV0aWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTE1MzcsImV4cCI6MjA5OTQyNzUzN30.FlTB7sM978K0koAIsxprnwhSm7X0cuB9CCSAe-6f450";
 // ============================================================
 
 const STATS = {
-  VIT: { name: "Vitality",     desc: "Body & health",            color: "#FF8A5C" },
-  INT: { name: "Intelligence", desc: "Courses, books, AI",       color: "#3EE6FF" },
-  CRE: { name: "Creation",     desc: "YouTube channel",          color: "#C77DFF" },
-  TER: { name: "Territory",    desc: "Building the land",        color: "#7CFFB2" },
-  BRZ: { name: "The Crossing", desc: "Portuguese & relocation",  color: "#FFD76A" },
-  SEA: { name: "Maritime",     desc: "Fishing business",         color: "#5CA9FF" }
+  VIT: { name: "Vitality",     desc: "Body & health",           color: "#FF8A5C" },
+  INT: { name: "Intelligence", desc: "Courses, books, AI",      color: "#3EE6FF" },
+  CRE: { name: "Creation",     desc: "YouTube channel",         color: "#C77DFF" },
+  TER: { name: "Territory",    desc: "Building the land",       color: "#7CFFB2" },
+  BRZ: { name: "The Crossing", desc: "Portuguese & relocation", color: "#FFD76A" },
+  SEA: { name: "Maritime",     desc: "Fishing business",        color: "#5CA9FF" }
 };
 
 const DEFAULT_QUESTS = [
@@ -270,19 +343,19 @@ const DEFAULT_QUESTS = [
   { id: 6, name: "Research boats, licenses, or market",  stat: "SEA", xp: 20, doneDate: null }
 ];
 
-const ACTS = { 1: "ACT I — THE PREPARATION", 2: "ACT II — THE CROSSING", 3: "ACT III — THE NEW WORLD" };
+const ACTS = { 1: "ACT I — THE PREPARATION", 2: "ACT II — THE CROSSING", 3: "ACT III — THE NEW WORLD", 4: "SIDE CAMPAIGNS" };
 
 const BOSSES = [
-  { id: "capstone",   act: 1, name: "IBM Capstone",           cond: "Capstone submitted, certificate earned",     xp: 300,  stat: "INT", skill: "Certified Data Professional", img: "boss-capstone.jpg",   icon: "skill-certified.png" },
-  { id: "episode",    act: 1, name: "First Episode Live",     cond: "First YouTube episode published",            xp: 300,  stat: "CRE", skill: "Storyteller",                 img: "boss-episode.jpg",    icon: "skill-storyteller.png" },
-  { id: "liquidation",act: 1, name: "The Great Liquidation",  cond: "UAE affairs closed, belongings sold",        xp: 300,  stat: "BRZ", skill: "Minimalist",                  img: "boss-liquidation.jpg",icon: "skill-minimalist.png" },
-  { id: "exit",       act: 1, name: "Exit Cleared",           cond: "Nothing holds you in the UAE anymore",       xp: 500,  stat: "BRZ", skill: "Free Agent",                  img: "boss-exit.jpg",       icon: "skill-freeagent.png" },
-  { id: "portuguese", act: 2, name: "The Portuguese Gate",    cond: "15-minute real conversation with a native",  xp: 300,  stat: "BRZ", skill: "Falante",                     img: "boss-portuguese.jpg", icon: "skill-falante.png" },
-  { id: "landing",    act: 2, name: "Landing in Brazil",      cond: "Feet on Brazilian soil, housing sorted",     xp: 500,  stat: "BRZ", skill: "Gate Crosser",                img: "boss-landing.jpg",    icon: "skill-gatecrosser.png" },
-  { id: "barrier",    act: 3, name: "The Barrier",            cond: "The land stands fully fenced",               xp: 300,  stat: "TER", skill: "Landholder",                  img: "boss-barrier.jpg",    icon: "skill-landholder.png" },
-  { id: "shipwright", act: 3, name: "The Shipwright's Trial", cond: "Boat built or bought, and floating",         xp: 400,  stat: "SEA", skill: "Shipwright",                  img: "boss-shipwright.jpg", icon: "skill-shipwright.png" },
-  { id: "catch",      act: 3, name: "First Catch",            cond: "First real fishing haul brought home",       xp: 300,  stat: "SEA", skill: "Pescador",                    img: "boss-catch.jpg",      icon: "skill-pescador.png" },
-  { id: "sale",       act: 3, name: "FINAL BOSS: First Sale", cond: "First money earned from your own boat",      xp: 1000, stat: "SEA", skill: "Capit\u00E3o",                img: "boss-sale.jpg",       icon: "skill-capitao.png" }
+  { id: "capstone",   act: 1, name: "IBM Capstone",           cond: "Capstone submitted, certificate earned",    xp: 300,  stat: "INT", skill: "Certified Data Professional", img: "boss-capstone.jpg",    icon: "skill-certified.png" },
+  { id: "episode",    act: 1, name: "First Episode Live",     cond: "First YouTube episode published",           xp: 300,  stat: "CRE", skill: "Storyteller",                 img: "boss-episode.jpg",     icon: "skill-storyteller.png" },
+  { id: "liquidation",act: 1, name: "The Great Liquidation",  cond: "UAE affairs closed, belongings sold",       xp: 300,  stat: "BRZ", skill: "Minimalist",                  img: "boss-liquidation.jpg", icon: "skill-minimalist.png" },
+  { id: "exit",       act: 1, name: "Exit Cleared",           cond: "Nothing holds you in the UAE anymore",      xp: 500,  stat: "BRZ", skill: "Free Agent",                  img: "boss-exit.jpg",        icon: "skill-freeagent.png" },
+  { id: "portuguese", act: 2, name: "The Portuguese Gate",    cond: "15-minute real conversation with a native", xp: 300,  stat: "BRZ", skill: "Falante",                     img: "boss-portuguese.jpg",  icon: "skill-falante.png" },
+  { id: "landing",    act: 2, name: "Landing in Brazil",      cond: "Feet on Brazilian soil, housing sorted",    xp: 500,  stat: "BRZ", skill: "Gate Crosser",                img: "boss-landing.jpg",     icon: "skill-gatecrosser.png" },
+  { id: "barrier",    act: 3, name: "The Barrier",            cond: "The land stands fully fenced",              xp: 300,  stat: "TER", skill: "Landholder",                  img: "boss-barrier.jpg",     icon: "skill-landholder.png" },
+  { id: "shipwright", act: 3, name: "The Shipwright's Trial", cond: "Boat built or bought, and floating",        xp: 400,  stat: "SEA", skill: "Shipwright",                  img: "boss-shipwright.jpg",  icon: "skill-shipwright.png" },
+  { id: "catch",      act: 3, name: "First Catch",            cond: "First real fishing haul brought home",      xp: 300,  stat: "SEA", skill: "Pescador",                    img: "boss-catch.jpg",       icon: "skill-pescador.png" },
+  { id: "sale",       act: 3, name: "FINAL BOSS: First Sale", cond: "First money earned from your own boat",     xp: 1000, stat: "SEA", skill: "Capit\u00E3o",                img: "boss-sale.jpg",        icon: "skill-capitao.png" }
 ];
 
 const KEY = "hunter-system-v1";
@@ -324,11 +397,15 @@ if (CLOUD_ENABLED && window.supabase) sb = window.supabase.createClient(SUPABASE
 let hunterKey = localStorage.getItem(HKEY) || null;
 
 let state = null, editMode = false, toastTimer = null, pushTimer = null, activeTab = "quests";
+let pendingQuests = [], fgBossArtData = null, fgSkillArtData = null, artTarget = null;
+
+function allBosses() { return BOSSES.concat(state.customBosses || []); }
+function getArt(id, kind) { return (state.artOverrides || {})[id + ":" + kind] || null; }
 
 function freshState() {
   return { totalXP: 0, stats: { VIT: 0, INT: 0, CRE: 0, TER: 0, BRZ: 0, SEA: 0 },
     quests: DEFAULT_QUESTS.map(q => ({ ...q })), streak: 0, lastActiveDate: null, nextId: 7,
-    bosses: {}, savedAt: null, version: 3 };
+    bosses: {}, customBosses: [], artOverrides: {}, savedAt: null, version: 4 };
 }
 
 function migrate(s) {
@@ -342,10 +419,14 @@ function migrate(s) {
       if (q.stat === "LNG") q.stat = "BRZ";
       if (!STATS[q.stat]) q.stat = "INT";
     });
-    s.version = 3;
   }
+  s.customBosses = s.customBosses || [];
+  s.artOverrides = s.artOverrides || {};
   s.bosses = s.bosses || {};
-  BOSSES.forEach(b => { if (!s.bosses[b.id]) s.bosses[b.id] = { defeated: false, date: null, reward: "", claimed: false }; });
+  s.version = 4;
+  BOSSES.concat(s.customBosses).forEach(b => {
+    if (!s.bosses[b.id]) s.bosses[b.id] = { defeated: false, date: null, reward: "", claimed: false };
+  });
   return s;
 }
 
@@ -359,7 +440,8 @@ function load() {
 
 function save() {
   state.savedAt = new Date().toISOString();
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { console.error(e); notify("SAVE TOO LARGE \u2014 remove some artwork"); }
   schedulePush();
 }
 
@@ -427,6 +509,26 @@ function notify(msg) {
   toastTimer = setTimeout(() => { t.style.display = "none"; }, 2600);
 }
 
+function compressImage(file, maxW, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      let data = canvas.toDataURL("image/jpeg", 0.72);
+      if (data.length > 400000) data = canvas.toDataURL("image/jpeg", 0.55);
+      cb(data);
+    };
+    img.onerror = () => notify("COULD NOT READ THAT IMAGE");
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function toggleQuest(id) {
   const today = todayStr();
   const q = state.quests.find(x => x.id === id);
@@ -465,7 +567,7 @@ function addQuest() {
 function deleteQuest(id) { state.quests = state.quests.filter(q => q.id !== id); save(); render(); }
 
 function defeatBoss(id) {
-  const b = BOSSES.find(x => x.id === id);
+  const b = allBosses().find(x => x.id === id);
   const bs = state.bosses[id];
   if (!b || !bs || bs.defeated) return;
   if (!confirm("Confirm: \"" + b.name + "\" is truly defeated?\n(" + b.cond + ")")) return;
@@ -475,17 +577,19 @@ function defeatBoss(id) {
   state.stats[b.stat] += b.xp;
   save(); render();
   const img = document.getElementById("vicImg");
+  const ov = getArt(id, "img");
   img.style.display = "none";
   img.onerror = () => { img.style.display = "none"; };
   img.onload = () => { img.style.display = "block"; };
-  img.src = "./art/" + b.img;
+  if (ov) img.src = ov;
+  else if (b.img) img.src = "./art/" + b.img;
   document.getElementById("vicName").textContent = b.name;
   document.getElementById("vicXP").textContent = "+" + b.xp + " XP \u2192 " + b.stat;
   document.getElementById("vicSkill").textContent = "Skill unlocked: " + b.skill;
   document.getElementById("victory").style.display = "flex";
 }
 function undoBoss(id) {
-  const b = BOSSES.find(x => x.id === id);
+  const b = allBosses().find(x => x.id === id);
   const bs = state.bosses[id];
   if (!b || !bs || !bs.defeated) return;
   if (!confirm("Revert \"" + b.name + "\"? XP will be removed.")) return;
@@ -508,10 +612,78 @@ function showLevelUp(lvl) {
   document.getElementById("levelup").style.display = "flex";
 }
 
+// ---------- The Forge ----------
+function renderPendingQuests() {
+  document.getElementById("fgQuestList").innerHTML = pendingQuests.map((q, i) =>
+    '<div class="camp-row"><span style="flex:1;">' + esc(q.name) + '</span><span class="mono" style="color:var(--cyan);">+' + q.xp + '</span><button class="btn-del" data-fgdel="' + i + '">\u2715</button></div>'
+  ).join("") || '<div class="fg-note">No quests added yet.</div>';
+}
+
+function forgeCampaign() {
+  const goal = document.getElementById("fgName").value.trim();
+  if (!goal) { notify("NAME YOUR GOAL FIRST, HUNTER"); return; }
+  const stat = document.getElementById("fgStat").value;
+  const bossName = document.getElementById("fgBossName").value.trim() || goal;
+  const cond = document.getElementById("fgBossCond").value.trim() || "Goal fully achieved";
+  const xp = Math.max(100, Math.min(1000, Number(document.getElementById("fgBossXP").value) || 300));
+  const skill = document.getElementById("fgSkill").value.trim() || goal + " \u2014 Mastered";
+  const reward = document.getElementById("fgReward").value.trim();
+  const id = "c" + Date.now();
+
+  state.customBosses.push({ id, act: 4, name: bossName, cond, xp, stat, skill, img: null, icon: null });
+  state.bosses[id] = { defeated: false, date: null, reward, claimed: false };
+  if (fgBossArtData) state.artOverrides[id + ":img"] = fgBossArtData;
+  if (fgSkillArtData) state.artOverrides[id + ":icon"] = fgSkillArtData;
+  pendingQuests.forEach(q => state.quests.push({ id: state.nextId++, name: q.name, stat, xp: q.xp, doneDate: null, campaignId: id }));
+
+  pendingQuests = []; fgBossArtData = null; fgSkillArtData = null;
+  ["fgName","fgBossName","fgBossCond","fgSkill","fgReward","fgQuestName"].forEach(i => document.getElementById(i).value = "");
+  document.getElementById("fgBossThumb").style.display = "none";
+  document.getElementById("fgSkillThumb").style.display = "none";
+  renderPendingQuests();
+  save(); render();
+  notify("\u2694 CAMPAIGN FORGED \u00B7 " + bossName.toUpperCase());
+  switchTab("bosses");
+}
+
+function deleteCampaign(id) {
+  const b = state.customBosses.find(x => x.id === id);
+  if (!b) return;
+  if (!confirm("Delete campaign \"" + b.name + "\"?\nIts boss, skill, and daily quests will be removed. XP already earned stays.")) return;
+  state.customBosses = state.customBosses.filter(x => x.id !== id);
+  state.quests = state.quests.filter(q => q.campaignId !== id);
+  delete state.bosses[id];
+  delete state.artOverrides[id + ":img"];
+  delete state.artOverrides[id + ":icon"];
+  save(); render();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  document.querySelectorAll(".tabpane").forEach(p => p.classList.toggle("active", p.id === "tab-" + tab));
+}
+
+// ---------- Render ----------
+function bossArtHTML(b) {
+  const ov = getArt(b.id, "img");
+  if (ov) return '<img class="boss-art" src="' + ov + '" alt="">';
+  if (b.img) return '<img class="boss-art" src="./art/' + b.img + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><div class="boss-ph" style="display:none;">\u2694</div>';
+  return '<div class="boss-ph">\u2694</div>';
+}
+function skillIconHTML(b) {
+  const ov = getArt(b.id, "icon");
+  const glyph = esc(b.skill.charAt(0));
+  if (ov) return '<img class="skill-icon" src="' + ov + '" alt="">';
+  if (b.icon) return '<img class="skill-icon" src="./art/' + b.icon + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><div class="skill-glyph" style="display:none;">' + glyph + '</div>';
+  return '<div class="skill-glyph">' + glyph + '</div>';
+}
+
 function render() {
   const today = todayStr();
+  const AB = allBosses();
   const { level, into, need } = levelFromXP(state.totalXP);
-  const bossCount = BOSSES.filter(b => state.bosses[b.id] && state.bosses[b.id].defeated).length;
+  const bossCount = AB.filter(b => state.bosses[b.id] && state.bosses[b.id].defeated).length;
   const finalDown = state.bosses.sale && state.bosses.sale.defeated;
   const { rank, capped, next } = currentRank(level, bossCount, finalDown);
 
@@ -534,7 +706,7 @@ function render() {
   const done = state.quests.filter(q => q.doneDate === today).length;
   document.getElementById("streakText").textContent = state.streak + (state.streak === 1 ? " day" : " days");
   document.getElementById("todayText").textContent = done + "/" + state.quests.length;
-  document.getElementById("bossCount").textContent = bossCount + "/" + BOSSES.length;
+  document.getElementById("bossCount").textContent = bossCount + "/" + AB.length;
 
   document.getElementById("statsGrid").innerHTML = Object.entries(STATS).map(([key, s]) => {
     const xp = state.stats[key] || 0;
@@ -549,14 +721,14 @@ function render() {
   }).join("");
 
   let bossHTML = "";
-  [1, 2, 3].forEach(act => {
+  [1, 2, 3, 4].forEach(act => {
+    const list = AB.filter(b => b.act === act);
+    if (!list.length) return;
     bossHTML += '<div class="act-title mono">' + ACTS[act] + '</div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">';
-    BOSSES.filter(b => b.act === act).forEach(b => {
+    list.forEach(b => {
       const bs = state.bosses[b.id];
       const d = bs.defeated;
-      bossHTML += '<div class="boss' + (d ? " defeated" : "") + '">' +
-        '<img class="boss-art" src="./art/' + b.img + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
-        '<div class="boss-ph" style="display:none;">\u2694</div>' +
+      bossHTML += '<div class="boss' + (d ? " defeated" : "") + '">' + bossArtHTML(b) +
         '<div class="boss-info"><div class="boss-name">' + esc(b.name) + (d ? ' \u2713' : '') + '</div>' +
         '<div class="boss-cond">' + esc(b.cond) + '</div>' +
         '<div class="boss-meta mono">+' + b.xp + ' XP \u2192 ' + b.stat + ' \u00B7 drops: ' + esc(b.skill) + (d && bs.date ? ' \u00B7 defeated ' + bs.date : '') + '</div></div>' +
@@ -568,40 +740,62 @@ function render() {
   });
   document.getElementById("bossList").innerHTML = bossHTML;
 
-  document.getElementById("skillsGrid").innerHTML = BOSSES.map(b => {
+  document.getElementById("skillsGrid").innerHTML = AB.map(b => {
     const d = state.bosses[b.id].defeated;
-    const glyph = b.skill.charAt(0);
-    return '<div class="skill' + (d ? "" : " locked") + '">' +
-      '<img class="skill-icon" src="./art/' + b.icon + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' +
-      '<div class="skill-glyph" style="display:none;">' + esc(glyph) + '</div>' +
+    return '<div class="skill' + (d ? "" : " locked") + '">' + skillIconHTML(b) +
       '<div class="skill-name">' + esc(b.skill) + '</div>' +
       '<div class="skill-src mono">' + (d ? "ACQUIRED" : "LOCKED \u00B7 " + esc(b.name)) + '</div></div>';
   }).join("");
 
-  document.getElementById("vaultList").innerHTML = BOSSES.map(b => {
+  document.getElementById("vaultList").innerHTML = AB.map(b => {
     const bs = state.bosses[b.id];
     return '<div class="vault-row"><div class="vault-boss mono">' + esc(b.name) + '</div>' +
       '<input type="text" maxlength="80" placeholder="Declare your reward\u2026" value="' + esc(bs.reward || "") + '" data-reward="' + b.id + '">' +
       '<button class="btn-claim' + (bs.claimed ? " claimed" : "") + '" data-claim="' + b.id + '" ' + (bs.defeated ? "" : "disabled") + '>' + (bs.claimed ? "CLAIMED \u2713" : "CLAIM") + '</button></div>';
   }).join("");
+
+  document.getElementById("campList").innerHTML = (state.customBosses.length ? state.customBosses.map(b =>
+    '<div class="camp-row"><span style="flex:1;font-weight:600;color:var(--bright);">' + esc(b.name) + '</span>' +
+    '<span class="mono" style="color:var(--dim);">' + b.stat + ' \u00B7 +' + b.xp + ' XP</span>' +
+    '<button class="btn-del" data-delcamp="' + b.id + '">\u2715</button></div>'
+  ).join("") : '<div class="fg-note">No custom campaigns yet. Forge your first one above.</div>');
+
+  document.getElementById("artList").innerHTML = AB.map(b => {
+    const oi = getArt(b.id, "img"), oc = getArt(b.id, "icon");
+    return '<div class="art-row"><span class="art-name">' + esc(b.name) + '</span>' +
+      (oi ? '<img class="thumb" src="' + oi + '" alt="">' : '') +
+      '<button class="btn-mini" data-artimg="' + b.id + '">' + (oi ? "REPLACE ART" : "+ BOSS ART") + '</button>' +
+      (oc ? '<img class="thumb-sq" src="' + oc + '" alt="">' : '') +
+      '<button class="btn-mini" data-articon="' + b.id + '">' + (oc ? "REPLACE ICON" : "+ SKILL ICON") + '</button></div>';
+  }).join("");
 }
 
+// ---------- Events ----------
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-toggle],[data-del],[data-fight],[data-undoboss],[data-claim],[data-tab]");
+  const t = e.target.closest("[data-toggle],[data-del],[data-fight],[data-undoboss],[data-claim],[data-tab],[data-fgdel],[data-delcamp],[data-artimg],[data-articon]");
   if (!t) return;
   if (t.dataset.toggle) toggleQuest(Number(t.dataset.toggle));
   if (t.dataset.del) deleteQuest(Number(t.dataset.del));
   if (t.dataset.fight) defeatBoss(t.dataset.fight);
   if (t.dataset.undoboss) undoBoss(t.dataset.undoboss);
   if (t.dataset.claim) claimReward(t.dataset.claim);
-  if (t.dataset.tab) {
-    activeTab = t.dataset.tab;
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === activeTab));
-    document.querySelectorAll(".tabpane").forEach(p => p.classList.toggle("active", p.id === "tab-" + activeTab));
-  }
+  if (t.dataset.tab) switchTab(t.dataset.tab);
+  if (t.dataset.fgdel !== undefined) { pendingQuests.splice(Number(t.dataset.fgdel), 1); renderPendingQuests(); }
+  if (t.dataset.delcamp) deleteCampaign(t.dataset.delcamp);
+  if (t.dataset.artimg) { artTarget = { id: t.dataset.artimg, kind: "img", maxW: 900 }; document.getElementById("artFile").click(); }
+  if (t.dataset.articon) { artTarget = { id: t.dataset.articon, kind: "icon", maxW: 256 }; document.getElementById("artFile").click(); }
 });
 document.addEventListener("change", e => {
   if (e.target.dataset && e.target.dataset.reward) setReward(e.target.dataset.reward, e.target.value);
+});
+document.getElementById("artFile").addEventListener("change", function () {
+  if (!this.files[0] || !artTarget) return;
+  compressImage(this.files[0], artTarget.maxW, data => {
+    state.artOverrides[artTarget.id + ":" + artTarget.kind] = data;
+    save(); render();
+    notify("ARTWORK SAVED \u00B7 SYNCING TO CLOUD");
+  });
+  this.value = "";
 });
 document.getElementById("btnAdd").addEventListener("click", addQuest);
 document.getElementById("qName").addEventListener("keydown", e => { if (e.key === "Enter") addQuest(); });
@@ -609,6 +803,34 @@ document.getElementById("btnEdit").addEventListener("click", () => {
   editMode = !editMode;
   document.getElementById("btnEdit").textContent = editMode ? "DONE" : "EDIT";
   render();
+});
+document.getElementById("btnFgQuest").addEventListener("click", () => {
+  const n = document.getElementById("fgQuestName").value.trim();
+  const x = Math.max(5, Math.min(100, Number(document.getElementById("fgQuestXP").value) || 20));
+  if (!n) return;
+  pendingQuests.push({ name: n, xp: x });
+  document.getElementById("fgQuestName").value = "";
+  renderPendingQuests();
+});
+document.getElementById("fgQuestName").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("btnFgQuest").click(); });
+document.getElementById("btnForge").addEventListener("click", forgeCampaign);
+document.getElementById("fgBossArt").addEventListener("change", function () {
+  if (!this.files[0]) return;
+  compressImage(this.files[0], 900, data => {
+    fgBossArtData = data;
+    const th = document.getElementById("fgBossThumb");
+    th.src = data; th.style.display = "inline-block";
+  });
+  this.value = "";
+});
+document.getElementById("fgSkillArt").addEventListener("change", function () {
+  if (!this.files[0]) return;
+  compressImage(this.files[0], 256, data => {
+    fgSkillArtData = data;
+    const th = document.getElementById("fgSkillThumb");
+    th.src = data; th.style.display = "inline-block";
+  });
+  this.value = "";
 });
 document.getElementById("levelup").addEventListener("click", () => document.getElementById("levelup").style.display = "none");
 document.getElementById("victory").addEventListener("click", () => document.getElementById("victory").style.display = "none");
@@ -634,12 +856,14 @@ function openKeyModal() {
   document.getElementById("keyModal").style.display = "flex";
 }
 document.getElementById("qStat").innerHTML = Object.keys(STATS).map(k => '<option value="' + k + '">' + k + '</option>').join("");
+document.getElementById("fgStat").innerHTML = Object.keys(STATS).map(k => '<option value="' + k + '">' + k + ' \u00B7 ' + STATS[k].name + '</option>').join("");
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pullCloud(); });
 window.addEventListener("online", pullCloud);
 window.addEventListener("offline", () => { if (sb && hunterKey) setSync("off", "OFFLINE"); });
 
 load();
 render();
+renderPendingQuests();
 if (!CLOUD_ENABLED) setSync("", "LOCAL ONLY");
 else if (!hunterKey) { setSync("", "NOT LINKED"); openKeyModal(); }
 else pullCloud();
