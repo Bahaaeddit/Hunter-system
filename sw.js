@@ -1,6 +1,6 @@
-// Hunter System — service worker (v3: boss campaign build)
+// Hunter System — service worker (v4: the forge build)
 
-const CACHE = "hunter-system-v3";
+const CACHE = "hunter-system-v4";
 const ASSETS = [
   "./",
   "./index.html",
